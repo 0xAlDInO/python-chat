@@ -3,13 +3,20 @@ eventlet.monkey_patch()
 
 import os
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_socketio import SocketIO, join_room, emit
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-# Configure Database URI (MySQL with SQLite fallback if MySQL is not configured)
+# Configure Upload Folder
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max limit
+
+# Configure Database URI (MySQL with SQLite fallback if MYSQL_HOST is not set)
 db_user = os.getenv('MYSQL_USER', 'root')
 db_password = os.getenv('MYSQL_PASSWORD', '')
 db_host = os.getenv('MYSQL_HOST', 'localhost')
@@ -32,6 +39,8 @@ class Message(db.Model):
     username = db.Column(db.String(80), nullable=False)
     room = db.Column(db.String(50), nullable=False)
     message = db.Column(db.Text, nullable=False)
+    file_url = db.Column(db.String(255), nullable=True)
+    file_type = db.Column(db.String(20), nullable=True) # 'image' or 'file'
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
 
     def to_dict(self):
@@ -40,6 +49,8 @@ class Message(db.Model):
             'username': self.username,
             'room': self.room,
             'message': self.message,
+            'file_url': self.file_url,
+            'file_type': self.file_type,
             'timestamp': self.timestamp.strftime('%H:%M')
         }
 
@@ -64,6 +75,30 @@ def chat():
     else:
         return redirect(url_for('home'))
 
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file:
+        filename = secure_filename(f"{int(datetime.utcnow().timestamp())}_{file.filename}")
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        file_url = f"/static/uploads/{filename}"
+
+        # Determine file type
+        ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+        file_type = 'image' if ext in ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'] else 'file'
+
+        return jsonify({
+            'file_url': file_url,
+            'filename': file.filename,
+            'file_type': file_type
+        })
+
 @app.route('/api/history/<room>')
 def get_room_history(room):
     messages = Message.query.filter_by(room=str(room)).order_by(Message.timestamp.asc()).all()
@@ -77,7 +112,9 @@ def handle_send_message_event(data):
     new_msg = Message(
         username=data['username'],
         room=str(data['room']),
-        message=data['message']
+        message=data.get('message', ''),
+        file_url=data.get('file_url'),
+        file_type=data.get('file_type')
     )
     db.session.add(new_msg)
     db.session.commit()

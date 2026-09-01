@@ -352,6 +352,29 @@
             border-top-right-radius: 2px;
         }
 
+        .message-image-attachment {
+            max-width: 240px;
+            max-height: 180px;
+            border-radius: 10px;
+            margin-top: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .message-file-attachment {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            margin-top: 6px;
+            text-decoration: none;
+            color: var(--primary-blue);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
         .message-meta {
             font-size: 11px;
             color: var(--text-light);
@@ -624,6 +647,7 @@
         .shared-links-list a {
             color: var(--primary-blue);
             text-decoration: none;
+            word-break: break-all;
         }
 
         .shared-photos-grid {
@@ -720,6 +744,10 @@
 <body>
 
     <div class="app-window">
+        <!-- Hidden file inputs -->
+        <input type="file" id="imageFileInput" accept="image/*" style="display: none;">
+        <input type="file" id="docFileInput" style="display: none;">
+
         <!-- 1. LEFT SIDEBAR -->
         <div id="sidebarLeft" class="sidebar-left">
             <div class="left-header">
@@ -788,12 +816,12 @@
             <!-- Input Area -->
             <div class="chat-input-container">
                 <form id="message_input_form" class="input-box-wrapper">
-                    <input type="text" id="message_input" class="message-text-input" placeholder="Type your message here..." autocomplete="off" required>
+                    <input type="text" id="message_input" class="message-text-input" placeholder="Type your message here..." autocomplete="off">
 
                     <div class="input-actions-bar">
                         <div class="input-left-tools">
-                            <button type="button" class="tool-btn" title="Image"><i class="fa-regular fa-image"></i></button>
-                            <button type="button" class="tool-btn" title="Fichier"><i class="fa-solid fa-paperclip"></i></button>
+                            <button type="button" id="uploadImageBtn" class="tool-btn" title="Téléverser Image"><i class="fa-regular fa-image"></i></button>
+                            <button type="button" id="uploadDocBtn" class="tool-btn" title="Téléverser Fichier"><i class="fa-solid fa-paperclip"></i></button>
                             <button type="button" id="emojiBtn" class="tool-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
                         </div>
                         <button type="submit" class="btn-reply">REPLY</button>
@@ -834,7 +862,7 @@
             <!-- Shared Files -->
             <div>
                 <div class="section-title"><i class="fa-solid fa-file"></i> SHARED FILES</div>
-                <ul class="shared-links-list">
+                <ul id="sharedFilesList" class="shared-links-list">
                     <li><a href="#">• Rapport_Oxalix_2025.pdf</a></li>
                     <li><a href="#">• Budget_Project.xlsx</a></li>
                 </ul>
@@ -843,7 +871,7 @@
             <!-- Shared Photos -->
             <div>
                 <div class="section-title"><i class="fa-solid fa-image"></i> SHARED PHOTOS</div>
-                <div class="shared-photos-grid">
+                <div id="sharedPhotosGrid" class="shared-photos-grid">
                     <div class="photo-thumb" style="background-color: #FBCFE8;"></div>
                     <div class="photo-thumb" style="background-color: #BAE6FD;"></div>
                 </div>
@@ -894,6 +922,13 @@
         const emojiPicker = document.getElementById('emojiPicker');
         const emojiGrid = document.getElementById('emojiGrid');
 
+        const uploadImageBtn = document.getElementById('uploadImageBtn');
+        const uploadDocBtn = document.getElementById('uploadDocBtn');
+        const imageFileInput = document.getElementById('imageFileInput');
+        const docFileInput = document.getElementById('docFileInput');
+        const sharedFilesList = document.getElementById('sharedFilesList');
+        const sharedPhotosGrid = document.getElementById('sharedPhotosGrid');
+
         const startCallBtn = document.getElementById('startCallBtn');
         const endCallBtn = document.getElementById('endCallBtn');
         const videoCallBox = document.getElementById('videoCallBox');
@@ -939,6 +974,38 @@
                 emojiPicker.classList.remove('active');
             }
         });
+
+        // --- File & Image Upload Handlers ---
+        uploadImageBtn.addEventListener('click', () => imageFileInput.click());
+        uploadDocBtn.addEventListener('click', () => docFileInput.click());
+
+        imageFileInput.addEventListener('change', () => handleFileUpload(imageFileInput.files[0]));
+        docFileInput.addEventListener('change', () => handleFileUpload(docFileInput.files[0]));
+
+        function handleFileUpload(file) {
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.file_url) {
+                    socket.emit('envoie_message', {
+                        username: username,
+                        room: room,
+                        message: messageInput.value.trim(),
+                        file_url: data.file_url,
+                        file_type: data.file_type
+                    });
+                    messageInput.value = '';
+                }
+            })
+            .catch(err => console.error("Erreur d'upload de fichier:", err));
+        }
 
         // Load DB History on start
         fetch(`/api/history/${room}`)
@@ -986,10 +1053,34 @@
             const initials = data.username.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             const avatarHtml = `<div class="avatar" style="width:34px;height:34px;font-size:12px;">${initials}</div>`;
 
+            let fileHtml = '';
+            if (data.file_url) {
+                if (data.file_type === 'image') {
+                    fileHtml = `<br><img src="${data.file_url}" class="message-image-attachment" onclick="window.open('${data.file_url}')" title="Agrandir">`;
+
+                    // Add to right sidebar photos
+                    const imgThumb = document.createElement('img');
+                    imgThumb.src = data.file_url;
+                    imgThumb.className = 'photo-thumb';
+                    imgThumb.onclick = () => window.open(data.file_url);
+                    sharedPhotosGrid.prepend(imgThumb);
+                } else {
+                    const filename = data.file_url.split('/').pop();
+                    fileHtml = `<br><a href="${data.file_url}" target="_blank" class="message-file-attachment"><i class="fa-solid fa-file-arrow-down"></i> ${escapeHtml(filename)}</a>`;
+
+                    // Add to right sidebar files
+                    const li = document.createElement('li');
+                    li.innerHTML = `<a href="${data.file_url}" target="_blank">• ${escapeHtml(filename)}</a>`;
+                    sharedFilesList.prepend(li);
+                }
+            }
+
+            const textContent = data.message ? escapeHtml(data.message) : '';
+
             row.innerHTML = `
                 ${avatarHtml}
                 <div class="message-content">
-                    <div class="message-bubble">${escapeHtml(data.message)}</div>
+                    <div class="message-bubble">${textContent}${fileHtml}</div>
                     <div class="message-meta">${data.timestamp || getCurrentTime()}</div>
                 </div>
             `;

@@ -1,106 +1,108 @@
-# OXMEMBER - Plateforme d'Échange, Historique MySQL & Visioconférence
+# OXMEMBER - Guide d'Utilisation Base de Données & Téléversement de Fichiers
 
-**OXMEMBER** est la plateforme d'échange et de visioconférence sécurisée développée pour les collaborateurs d'**Oxalix**.
-
----
-
-## 🎨 Fonctionnalités Principales & Nouveau Design
-
-- **Interface Modèle 3 Colonnes :**
-  - **Colonne de Gauche :** Titre **OXMEMBER** épuré (sans logo et sans le texte "Chat"), barre de recherche d'utilisateurs et salons avec statut en ligne.
-  - **Colonne Centrale :** En-tête de conversation avec l'interlocuteur/salon (`To: Salon #...`), historique des messages persistant, bulles de messages stylisées (jaune sable `#FFF8E7` pour les destinataires, bleu clair `#E3F2FD` pour l'utilisateur), et zone de saisie avec bouton **REPLY**.
-  - **Colonne de Droite :** Fiche profil de l'utilisateur connectée, panneau d'appel vidéo WebRTC rétractable et prévisualisation des fichiers et images partagés.
-
-- **Persistance des Messages & Base de Données MySQL / SQLite :**
-  - Sauvegarde automatique en base de données SQL (table `messages`).
-  - Restitution immédiate de l'historique des conversations lors de la connexion à un salon via une API REST `/api/history/<room>`.
-  - Support natif de **MySQL** avec bascule automatique vers SQLite pour un démarrage rapide sans configuration externe.
-
-- **Visioconférence HD WebRTC P2P :**
-  - Appels vidéo et audio en direct sans plugin externe.
-  - Panneau d'incrustation vidéo (Picture-in-Picture) et boutons de contrôle (coupure micro, coupure caméra, raccrocher).
-
-- **Sélecteur d'Emojis (Emoji Picker) :**
-  - Insertion rapide d'emojis dans le champ de texte via une fenêtre popover.
+**OXMEMBER** est la plateforme d'échange, de visioconférence et de partage de fichiers développée pour les collaborateurs d'**Oxalix**.
 
 ---
 
-## 🛠️ Configuration de la Base de Données MySQL
+## 🗄️ Guide d'Utilisation de la Base de Données (MySQL & SQLite)
 
-L'application supporte nativement un serveur MySQL distant ou local via **Flask-SQLAlchemy** et **PyMySQL**.
+L'application intègre **Flask-SQLAlchemy** pour la persistance complète des messages, des fichiers et des salons.
 
-### Variables d'environnement pour MySQL :
+### 1. Structure de la Base de Données
 
-Pour vous connecter à votre propre instance MySQL, définissez les variables d'environnement suivantes avant de lancer l'application :
+La table `messages` est automatiquement créée au démarrage de l'application :
 
-```bash
-export MYSQL_USER="votre_utilisateur"
-export MYSQL_PASSWORD="votre_mot_de_passe"
-export MYSQL_HOST="localhost"
-export MYSQL_DATABASE="oxmember_db"
+```sql
+CREATE TABLE messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(80) NOT NULL,
+    room VARCHAR(50) NOT NULL,
+    message TEXT NOT NULL,
+    file_url VARCHAR(255) NULL,
+    file_type VARCHAR(20) NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
-*Note : Si aucune variable MySQL n'est configurée, l'application crée et utilise automatiquement une base de données SQLite locale `instance/oxmember.db` sans aucune erreur.*
+### 2. Utilisation avec MySQL
+
+Pour connecter l'application à votre serveur **MySQL** (local ou serveur distant) :
+
+1. Créez la base de données dans votre serveur MySQL :
+   ```sql
+   CREATE DATABASE oxmember_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+
+2. Exportez les variables d'environnement dans votre terminal avant de lancer l'application :
+   ```bash
+   # Sous Linux / macOS :
+   export MYSQL_USER="votre_utilisateur"
+   export MYSQL_PASSWORD="votre_mot_de_passe"
+   export MYSQL_HOST="localhost"
+   export MYSQL_DATABASE="oxmember_db"
+
+   # Sous Windows (PowerShell) :
+   $env:MYSQL_USER="votre_utilisateur"
+   $env:MYSQL_PASSWORD="votre_mot_de_passe"
+   $env:MYSQL_HOST="localhost"
+   $env:MYSQL_DATABASE="oxmember_db"
+   ```
+
+3. Ou fournissez une URL de connexion SQL directe :
+   ```bash
+   export DATABASE_URL="mysql+pymysql://utilisateur:motdepasse@localhost:3306/oxmember_db"
+   ```
+
+### 3. Mode de Repli SQLite Automatique (Sans Configuration)
+
+Si vous ne définissez aucune variable MySQL (`MYSQL_HOST`), l'application bascule automatiquement sur une base de données **SQLite** locale stockée dans le fichier `instance/oxmember.db`. **Aucune installation ou configuration préalable de MySQL n'est requise pour tester l'application.**
 
 ---
 
-## ⚙️ Guide d'Installation & Démarrage Rapide
+## 📁 Guide d'Utilisation du Téléversement d'Images et de Fichiers (File/Image Upload)
 
-### 1. Activer l'environnement virtuel
+L'application prend en charge l'envoi d'images (PNG, JPG, GIF, WebP) et de documents (PDF, XLSX, DOCX, TXT, etc.).
 
-```bash
-# Linux / macOS
-python3 -m venv venv
-source venv/bin/activate
+### 1. Fonctionnement du Téléversement
 
-# Windows
-python -m venv venv
-venv\Scripts\activate
-```
+1. Dans la zone de saisie du chat, cliquez sur l'icône **Image** 🖼️ ou **Fichier/Trombone** 📎.
+2. Sélectionnez votre fichier sur votre appareil.
+3. Le fichier est automatiquement envoyé vers le serveur via la route HTTP POST `/upload` (limite max 16 Mo).
+4. Le fichier est stocké dans le répertoire `static/uploads/`.
+5. Un message WebSocket est diffusé instantanément à tous les participants du salon avec le lien du fichier ou la prévisualisation de l'image.
 
-### 2. Installer les dépendances
+### 2. Galerie Automatique du Panneau Latéral
+- Les images téléchargées s'affichent directement dans les bulles du chat et s'ajoutent à la galerie **SHARED PHOTOS** dans le panneau latéral droit.
+- Les documents téléchargés s'affichent sous forme de bouton de téléchargement direct et s'ajoutent à la liste **SHARED FILES**.
+
+---
+
+## ⚙️ Procédure Rapide de Démarrage
+
+### 1. Installer les dépendances
 
 ```bash
 pip install -r requirement.txt
 ```
 
-### 3. Lancer le serveur d'application
+### 2. Démarrer l'application
 
 ```bash
 python app.py
 ```
 
-L'application est disponible sur `http://127.0.0.1:5000`.
+Accédez à l'application dans votre navigateur : `http://127.0.0.1:5000`.
 
 ---
 
-## 🧪 Le Meilleur Assistant de Test & Validation (Guide Complétif)
+## 🧪 Scénarios de Test et d'Assistance
 
-Ce guide permet de tester l'intégralité du système rapidement :
+### Scénario 1 : Test du Téléversement d'Image et de Document
+1. Connectez-vous sur `http://127.0.0.1:5000` avec le nom **John Mayers** dans le salon **101**.
+2. Cliquez sur l'icône Image 🖼️ en bas à gauche de la zone d'écriture.
+3. Choisissez une photo. L'image apparaît directement dans la discussion et s'ajoute à la section **SHARED PHOTOS** à droite.
+4. Cliquez sur l'icône Trombone 📎 pour envoyer un document PDF. Le fichier apparaît sous forme de lien de téléchargement.
 
-### Scénario 1 : Validation de l'historique et de la persistance des messages (MySQL / SQLite)
-1. Ouvrez un navigateur et rendez-vous sur `http://127.0.0.1:5000`.
-2. Connectez-vous sous le nom **"John Mayers"** dans le salon **101**.
-3. Tapez le message : `"Bonjour l'équipe Oxalix, voici le premier message !"`. Cliquez sur **REPLY**.
-4. Fermez l'onglet ou rafraîchissez la page.
-5. Reconnectez-vous au salon **101** : le message précédent s'affiche immédiatement grâce au rechargement de l'historique depuis la base de données.
-
-### Scénario 2 : Test d'échange en temps réel multi-utilisateurs
-1. Ouvrez deux fenêtres de navigateur côte à côte.
-2. Window 1 : Nom **"John Mayers"**, Salon **101**.
-3. Window 2 : Nom **"Mike Stuart"**, Salon **101**.
-4. Transmettez des messages de part et d'autre et vérifiez :
-   - L'affichage instantané côté destinataire (bulle couleur sable `#FFF8E7`).
-   - L'affichage côté expéditeur (bulle couleur bleu clair `#E3F2FD`).
-   - L'horodatage en bas à droite de chaque message.
-
-### Scénario 3 : Test de l'Emoji Picker
-1. Cliquez sur l'icône Smile 😃 dans la barre d'outils inférieure.
-2. Cliquez sur l'emoji 👍 ou 🚀.
-3. Vérifiez que l'emoji s'insère dans le champ de saisie, puis envoyez-le.
-
-### Scénario 4 : Test de l'Appel Vidéo WebRTC
-1. Dans l'en-tête de discussion, cliquez sur l'icône caméra 📹.
-2. Le panneau d'appel vidéo s'ouvre sur la colonne de droite.
-3. Autorisez l'accès au micro/caméra. La vidéo locale s'incruste dans le coin inférieur droit.
-4. Testez la coupure micro, caméra et le bouton rouge pour raccrocher.
+### Scénario 2 : Test de l'Historique de Base de Données
+1. Après avoir envoyé quelques messages et fichiers, rafraîchissez votre navigateur (F5).
+2. L'ensemble des messages et des fichiers envoyés est réaffiché automatiquement grâce à l'API de rechargement d'historique `/api/history/101`.
