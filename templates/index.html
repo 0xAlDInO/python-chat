@@ -1,82 +1,217 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Chat</title>
+    <title>OXMEMBER - Espace Collaboratif Oxalix</title>
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --primary-light: #EEF2FF;
+            --dark-bg: #0F172A;
+            --card-bg: #1E293B;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --accent: #06B6D4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background: radial-gradient(circle at top right, #1E1B4B, #0F172A);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background-color: #fff;
+            color: var(--text-main);
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+        }
+
+        .login-card {
+            background-color: rgba(30, 41, 59, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             width: 100%;
+            max-width: 440px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
         }
-        h1 {
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #4F46E5, #06B6D4, #10B981);
+        }
+
+        .brand-header {
             text-align: center;
-            color: #333;
+            margin-bottom: 32px;
         }
+
+        .brand-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+            margin-bottom: 16px;
+        }
+
+        .brand-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #FFFFFF, #94A3B8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 6px;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 22px;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #CBD5E1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .form-group input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
             font-size: 16px;
         }
-        .form-group input[type="text"] {
-            /* Additional styling for text inputs */
-        }
-        .form-group input[type="number"] {
-            /* Additional styling for number inputs */
-        }
-        button {
+
+        .form-control {
             width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
+            padding: 12px 16px 12px 42px;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            transition: all 0.2s ease;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+            background-color: rgba(15, 23, 42, 0.9);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), #3730A3);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .footer-note {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Join Chat</h1>
-        <form action="/chat">
-            <div class="form-group">
-                <label for="username">Entre votre nom d'utilisateur</label>
-                <input type="text" id="username" name="username" required>
+    <div class="login-card">
+        <div class="brand-header">
+            <div class="brand-logo">
+                <i class="fa-solid fa-comments"></i>
             </div>
+            <h1 class="brand-title">OXMEMBER</h1>
+            <p class="brand-subtitle">Plateforme d'échange & visioconférence Oxalix</p>
+        </div>
+
+        <form action="/chat" method="GET">
             <div class="form-group">
-                <label for="room">Identifiant du chat</label>
-                <input type="number" id="room" name="room" required>
+                <label for="username">Nom d'utilisateur</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="ex: Jean Dupont" required autocomplete="off">
+                </div>
             </div>
-            <button type="submit">Submit</button>
+
+            <div class="form-group">
+                <label for="room">ID du Salon / Chambre</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-hashtag input-icon"></i>
+                    <input type="number" id="room" name="room" class="form-control" placeholder="ex: 101" required autocomplete="off">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <span>Rejoindre la salle</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
         </form>
+
+        <div class="footer-note">
+            &copy; Oxalix — Espace d'échange sécurisé pour employés
+        </div>
     </div>
 </body>
 </html>

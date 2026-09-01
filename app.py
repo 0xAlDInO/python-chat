@@ -33,7 +33,27 @@ def handle_send_message_event(data):
 def handle_join_room_event(data):
     app.logger.info(f"{data['username']} a rejoint le room {data['room']}")
     join_room(data['room'])
-    socketio.emit('announcement_join_room', data)
+    socketio.emit('announcement_join_room', data, room=data['room'])
+
+@socketio.on('webrtc_offer')
+def handle_webrtc_offer(data):
+    # Relay WebRTC offer to other peer(s) in room
+    socketio.emit('webrtc_offer', data, room=data['room'], include_self=False)
+
+@socketio.on('webrtc_answer')
+def handle_webrtc_answer(data):
+    # Relay WebRTC answer to other peer(s) in room
+    socketio.emit('webrtc_answer', data, room=data['room'], include_self=False)
+
+@socketio.on('webrtc_ice_candidate')
+def handle_webrtc_ice_candidate(data):
+    # Relay ICE candidate to other peer(s) in room
+    socketio.emit('webrtc_ice_candidate', data, room=data['room'], include_self=False)
+
+@socketio.on('webrtc_end_call')
+def handle_webrtc_end_call(data):
+    # Relay end call signal to other peer(s) in room
+    socketio.emit('webrtc_end_call', data, room=data['room'], include_self=False)
 
 if __name__ == "__main__":
     import eventlet
