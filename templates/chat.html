@@ -3,25 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OXMEMBER - Chat & Visioconférence</title>
+    <title>OXMEMBER</title>
     <!-- Font Awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --dark-bg: #0F172A;
-            --card-bg: #1E293B;
-            --panel-bg: #111827;
-            --text-main: #F8FAFC;
-            --text-muted: #94A3B8;
-            --border-color: #334155;
-            --accent: #06B6D4;
-            --success: #10B981;
+            --primary-blue: #3B82F6;
+            --primary-hover: #2563EB;
+            --bg-gradient: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%);
+            --app-bg: #FFFFFF;
+            --sidebar-left-bg: #F8FAFC;
+            --sidebar-right-bg: #FFFFFF;
+            --chat-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --text-light: #94A3B8;
+            --border-color: #E2E8F0;
+            --bubble-other: #FFF8E7; /* Soft sand yellow */
+            --bubble-me: #E3F2FD;    /* Soft light blue */
+            --online-green: #10B981;
             --danger: #EF4444;
-            --warning: #F59E0B;
         }
 
         * {
@@ -32,370 +35,499 @@
         }
 
         body {
-            background-color: var(--dark-bg);
-            color: var(--text-main);
+            background: var(--bg-gradient);
             height: 100vh;
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* Top Bar Header */
-        header {
-            background-color: var(--card-bg);
-            border-bottom: 1px solid var(--border-color);
-            padding: 14px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 10;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .header-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header-logo {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 18px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .header-title-container h1 {
-            font-size: 18px;
-            font-weight: 700;
-            line-height: 1.2;
-            color: white;
-        }
-
-        .header-title-container p {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .header-actions {
-            display: flex;
             align-items: center;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 9px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .btn-danger {
-            background-color: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #DC2626;
-        }
-
-        .btn-secondary {
-            background-color: #334155;
+            padding: 24px;
             color: var(--text-main);
-        }
-
-        .btn-secondary:hover {
-            background-color: #475569;
-        }
-
-        .btn-leave {
-            background-color: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-leave:hover {
-            color: white;
-            border-color: var(--text-muted);
-        }
-
-        /* Main Container layout */
-        .main-container {
-            flex: 1;
-            display: flex;
-            height: calc(100vh - 67px);
             overflow: hidden;
+        }
+
+        /* App Layout Frame */
+        .app-window {
+            background-color: var(--app-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1280px;
+            height: 100%;
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* ---------------- LEFT SIDEBAR ---------------- */
+        .sidebar-left {
+            background-color: var(--sidebar-left-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .left-header {
+            padding: 24px 20px 16px;
+        }
+
+        .brand-title-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            letter-spacing: -0.5px;
+            margin-bottom: 16px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .tab-item {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab-item.active {
+            color: var(--primary-blue);
             position: relative;
         }
 
-        /* Chat Panel */
-        .chat-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            background-color: var(--dark-bg);
+        .tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -13px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-blue);
         }
 
-        .messages-container {
+        .search-box {
+            padding: 0 20px 16px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 36px;
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+            color: var(--text-main);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 13px;
+        }
+
+        .contacts-list {
             flex: 1;
-            padding: 20px 24px;
+            overflow-y: auto;
+            padding: 0 12px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .contact-item:hover, .contact-item.active {
+            background-color: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .avatar-container {
+            position: relative;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background-color: #DBEAFE;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--online-green);
+            border: 2px solid white;
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+
+        .contact-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .contact-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .contact-time {
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--text-light);
+        }
+
+        .contact-preview {
+            font-size: 12px;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ---------------- MAIN CHAT AREA ---------------- */
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--chat-bg);
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-target-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .chat-target-info span.to-label {
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--primary-blue);
+        }
+
+        .action-icon-btn {
+            background: none;
+            border: none;
+            color: var(--primary-blue);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: background 0.15s;
+        }
+
+        .action-icon-btn:hover {
+            background-color: #EFF6FF;
+        }
+
+        /* Messages stream */
+        .messages-area {
+            flex: 1;
+            padding: 24px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
+
+        .date-divider {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-light);
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .date-divider::before, .date-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 35%;
+            height: 1px;
+            background-color: var(--border-color);
+        }
+
+        .date-divider::before { left: 0; }
+        .date-divider::after { right: 0; }
 
         .message-row {
             display: flex;
-            flex-direction: column;
-            max-width: 70%;
-            animation: fadeIn 0.2s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            gap: 12px;
+            max-width: 75%;
         }
 
         .message-row.me {
             align-self: flex-end;
-            align-items: flex-end;
+            flex-direction: row-reverse;
         }
 
         .message-row.other {
             align-self: flex-start;
-            align-items: flex-start;
         }
 
-        .message-author {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-            padding: 0 4px;
+        .message-content {
+            display: flex;
+            flex-direction: column;
         }
 
         .message-bubble {
-            padding: 12px 16px;
+            padding: 14px 18px;
             border-radius: 16px;
             font-size: 14px;
             line-height: 1.5;
+            color: var(--text-main);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
             word-break: break-word;
-            position: relative;
-        }
-
-        .message-row.me .message-bubble {
-            background: linear-gradient(135deg, var(--primary), #3730A3);
-            color: white;
-            border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
         }
 
         .message-row.other .message-bubble {
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            border-bottom-left-radius: 4px;
-            border: 1px solid var(--border-color);
+            background-color: var(--bubble-other);
+            border-top-left-radius: 2px;
         }
 
-        .message-time {
-            font-size: 10px;
-            opacity: 0.7;
+        .message-row.me .message-bubble {
+            background-color: var(--bubble-me);
+            border-top-right-radius: 2px;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            color: var(--text-light);
             margin-top: 4px;
+        }
+
+        .message-row.me .message-meta {
             text-align: right;
         }
 
-        .system-notification {
+        .system-toast {
             align-self: center;
-            background-color: rgba(30, 41, 59, 0.6);
-            border: 1px solid var(--border-color);
+            background-color: #F1F5F9;
             color: var(--text-muted);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 12px;
-            margin: 8px 0;
-            text-align: center;
         }
 
-        /* Chat Input Area */
-        .chat-input-area {
-            background-color: var(--card-bg);
+        /* Bottom Saisie Area */
+        .chat-input-container {
+            padding: 16px 24px 20px;
             border-top: 1px solid var(--border-color);
-            padding: 14px 20px;
             position: relative;
         }
 
-        .input-form-wrapper {
+        .input-box-wrapper {
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
-            background-color: rgba(15, 23, 42, 0.8);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 6px 10px;
         }
 
-        .input-form-wrapper:focus-within {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
-        }
-
-        .btn-emoji-trigger {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 6px;
-            transition: color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-emoji-trigger:hover {
-            color: var(--warning);
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .chat-input {
-            flex: 1;
-            background: transparent;
+        .message-text-input {
+            width: 100%;
             border: none;
             outline: none;
-            color: white;
-            font-size: 15px;
-            padding: 8px 0;
+            font-size: 14px;
+            color: var(--text-main);
+            resize: none;
+            font-family: inherit;
         }
 
-        .chat-input::placeholder {
-            color: var(--text-muted);
+        .input-actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .btn-send {
-            background-color: var(--primary);
+        .input-left-tools {
+            display: flex;
+            gap: 12px;
+            color: var(--primary-blue);
+        }
+
+        .tool-btn {
+            background: none;
+            border: none;
+            color: var(--primary-blue);
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-reply {
+            padding: 8px 20px;
+            background-color: var(--primary-blue);
             color: white;
             border: none;
-            border-radius: 8px;
-            width: 38px;
-            height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: background 0.2s ease;
+            letter-spacing: 0.5px;
+            transition: background 0.15s;
         }
 
-        .btn-send:hover {
+        .btn-reply:hover {
             background-color: var(--primary-hover);
         }
 
-        /* Emoji Picker Popover */
+        /* Emoji Popover */
         .emoji-picker-popover {
             display: none;
             position: absolute;
             bottom: 75px;
-            left: 20px;
-            background-color: var(--card-bg);
+            left: 24px;
+            background-color: #FFFFFF;
             border: 1px solid var(--border-color);
-            border-radius: 14px;
+            border-radius: 12px;
             padding: 12px;
-            width: 310px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            z-index: 100;
+            width: 300px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 50;
         }
 
         .emoji-picker-popover.active {
             display: block;
-            animation: fadeIn 0.15s ease-out;
-        }
-
-        .emoji-picker-header {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .emoji-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 6px;
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
         }
 
         .emoji-item {
-            font-size: 22px;
+            font-size: 20px;
             text-align: center;
-            padding: 6px;
+            padding: 4px;
             cursor: pointer;
-            border-radius: 6px;
-            transition: transform 0.1s, background-color 0.1s;
-            user-select: none;
+            border-radius: 4px;
         }
 
         .emoji-item:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            transform: scale(1.2);
+            background-color: #F1F5F9;
+        }
+
+        /* ---------------- RIGHT SIDEBAR ---------------- */
+        .sidebar-right {
+            background-color: var(--sidebar-right-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow-y: auto;
+        }
+
+        .profile-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background-color: #DBEAFE;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .profile-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .profile-location {
+            font-size: 12px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-top: 2px;
+            margin-bottom: 12px;
+        }
+
+        .profile-socials {
+            display: flex;
+            gap: 12px;
+            color: var(--primary-blue);
+            font-size: 14px;
         }
 
         /* Video Call Panel */
-        .video-panel {
+        .video-call-box {
             display: none;
-            width: 50%;
-            background-color: #050B14;
-            border-left: 1px solid var(--border-color);
+            background-color: #0F172A;
+            border-radius: 12px;
+            overflow: hidden;
             flex-direction: column;
             position: relative;
         }
 
-        .video-panel.active {
+        .video-call-box.active {
             display: flex;
         }
 
-        .video-grid {
-            flex: 1;
+        .video-screen {
             position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #000;
-            overflow: hidden;
-        }
-
-        .remote-video-wrapper {
             width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            height: 160px;
+            background-color: #000;
         }
 
         video#remoteVideo {
@@ -404,177 +536,225 @@
             object-fit: cover;
         }
 
-        .video-placeholder {
+        .local-pip {
             position: absolute;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-muted);
-        }
-
-        .video-placeholder i {
-            font-size: 48px;
-        }
-
-        .local-video-wrapper {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 160px;
-            height: 120px;
-            border-radius: 12px;
+            bottom: 8px;
+            right: 8px;
+            width: 60px;
+            height: 45px;
+            border-radius: 6px;
             overflow: hidden;
-            border: 2px solid var(--primary);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-            background-color: #1E293B;
-            z-index: 5;
+            border: 1px solid var(--primary-blue);
         }
 
         video#localVideo {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1); /* Mirror local view */
+            transform: scaleX(-1);
         }
 
-        .video-controls-bar {
-            height: 70px;
-            background-color: var(--card-bg);
-            border-top: 1px solid var(--border-color);
+        .video-controls {
             display: flex;
-            align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 10px;
+            padding: 10px;
+            background-color: #1E293B;
         }
 
-        .control-btn {
-            width: 44px;
-            height: 44px;
+        .v-btn {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border: none;
             background-color: #334155;
             color: white;
-            font-size: 16px;
+            font-size: 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
         }
 
-        .control-btn:hover {
-            background-color: #475569;
-        }
-
-        .control-btn.active-off {
+        .v-btn.danger {
             background-color: var(--danger);
         }
 
-        .control-btn.btn-hangup {
-            background-color: var(--danger);
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .control-btn.btn-hangup:hover {
-            background-color: #DC2626;
+        .shared-links-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 13px;
         }
 
-        /* Responsive layout adjustment */
-        @media (max-width: 900px) {
-            .main-container {
-                flex-direction: column;
+        .shared-links-list a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .shared-photos-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .photo-thumb {
+            width: 100%;
+            height: 70px;
+            border-radius: 8px;
+            background-color: #F1F5F9;
+            object-fit: cover;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .app-window {
+                grid-template-columns: 260px 1fr;
             }
-            .video-panel.active {
-                width: 100%;
-                height: 45vh;
+            .sidebar-right {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header Navigation -->
-    <header>
-        <div class="header-brand">
-            <div class="header-logo">OX</div>
-            <div class="header-title-container">
-                <h1>OXMEMBER Chat</h1>
-                <p>Salon d'échange n° <span id="display-room">{{ room }}</span> — Connecté en tant que <strong id="display-username">{{ username }}</strong></p>
-            </div>
-        </div>
-        <div class="header-actions">
-            <button id="startCallBtn" class="btn btn-primary">
-                <i class="fa-solid fa-video"></i>
-                <span>Démarrer Appel Vidéo</span>
-            </button>
-            <a href="/" class="btn btn-leave">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Quitter</span>
-            </a>
-        </div>
-    </header>
-
-    <!-- Main Workspace -->
-    <div class="main-container">
-
-        <!-- Chat Panel -->
-        <div class="chat-panel">
-            <div id="messages" class="messages-container"></div>
-
-            <!-- Emoji Picker Popover -->
-            <div id="emojiPicker" class="emoji-picker-popover">
-                <div class="emoji-picker-header">Choisir un emoji</div>
-                <div class="emoji-grid" id="emojiGrid">
-                    <!-- Emojis dynamically inserted or predefined -->
+    <div class="app-window">
+        <!-- 1. LEFT SIDEBAR -->
+        <div class="sidebar-left">
+            <div class="left-header">
+                <div class="brand-title-text">OXMEMBER</div>
+                <div class="nav-tabs">
+                    <div class="tab-item active">CHATS</div>
+                    <div class="tab-item">CONTACTS</div>
+                    <div class="tab-item">FAVORITES</div>
                 </div>
             </div>
 
-            <!-- Chat Input Area -->
-            <div class="chat-input-area">
-                <form id="message_input_form" class="input-form-wrapper">
-                    <button type="button" id="emojiBtn" class="btn-emoji-trigger" title="Ajouter un emoji">
-                        <i class="fa-regular fa-face-smile"></i>
-                    </button>
-                    <input type="text" id="message_input" class="chat-input" placeholder="Écrivez votre message..." autocomplete="off" required>
-                    <button type="submit" class="btn-send" title="Envoyer">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search users by name...">
+            </div>
+
+            <div class="contacts-list">
+                <div class="contact-item active">
+                    <div class="avatar-container">
+                        <div class="avatar">JM</div>
+                        <div class="status-dot"></div>
+                    </div>
+                    <div class="contact-info">
+                        <div class="contact-name">
+                            <span>Salon #{{ room }}</span>
+                            <span class="contact-time">Direct</span>
+                        </div>
+                        <div class="contact-preview">Discussion de groupe Oxalix</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. MAIN CHAT AREA -->
+        <div class="chat-main">
+            <!-- Header -->
+            <div class="chat-header">
+                <div class="chat-target-info">
+                    <span class="to-label">To:</span>
+                    <span>Salon #{{ room }}</span>
+                </div>
+                <div class="header-controls">
+                    <button class="action-icon-btn" title="Recherche dans le chat"><i class="fa-regular fa-comment-dots"></i></button>
+                    <button class="action-icon-btn" title="Appel vocal"><i class="fa-solid fa-phone"></i></button>
+                    <button id="startCallBtn" class="action-icon-btn" title="Démarrer l'Appel Vidéo"><i class="fa-solid fa-video"></i></button>
+                </div>
+            </div>
+
+            <!-- Messages Container -->
+            <div id="messages" class="messages-area">
+                <div class="date-divider">Aujourd'hui</div>
+            </div>
+
+            <!-- Emoji Picker Popover -->
+            <div id="emojiPicker" class="emoji-picker-popover">
+                <div class="emoji-grid" id="emojiGrid"></div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="chat-input-container">
+                <form id="message_input_form" class="input-box-wrapper">
+                    <input type="text" id="message_input" class="message-text-input" placeholder="Type your message here..." autocomplete="off" required>
+
+                    <div class="input-actions-bar">
+                        <div class="input-left-tools">
+                            <button type="button" class="tool-btn" title="Image"><i class="fa-regular fa-image"></i></button>
+                            <button type="button" class="tool-btn" title="Fichier"><i class="fa-solid fa-paperclip"></i></button>
+                            <button type="button" id="emojiBtn" class="tool-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+                        </div>
+                        <button type="submit" class="btn-reply">REPLY</button>
+                    </div>
                 </form>
             </div>
         </div>
 
-        <!-- Video Call Panel -->
-        <div id="videoPanel" class="video-panel">
-            <div class="video-grid">
-                <div class="remote-video-wrapper">
-                    <div id="videoPlaceholder" class="video-placeholder">
-                        <i class="fa-solid fa-user-slash"></i>
-                        <span>En attente de connexion vidéo de l'autre participant...</span>
-                    </div>
-                    <video id="remoteVideo" autoplay playsinline></video>
-                </div>
-
-                <div class="local-video-wrapper">
-                    <video id="localVideo" autoplay playsinline muted></video>
+        <!-- 3. RIGHT SIDEBAR -->
+        <div class="sidebar-right">
+            <!-- Profile Card -->
+            <div class="profile-card">
+                <div class="profile-avatar" id="userInitial">OX</div>
+                <div class="profile-name" id="profileUsername">{{ username }}</div>
+                <div class="profile-location">Membre Oxalix</div>
+                <div class="profile-socials">
+                    <i class="fa-brands fa-facebook-f"></i>
+                    <i class="fa-brands fa-twitter"></i>
+                    <i class="fa-brands fa-linkedin-in"></i>
                 </div>
             </div>
 
-            <div class="video-controls-bar">
-                <button id="toggleAudioBtn" class="control-btn" title="Activer / Désactiver le micro">
-                    <i class="fa-solid fa-microphone"></i>
-                </button>
-                <button id="toggleVideoBtn" class="control-btn" title="Activer / Désactiver la caméra">
-                    <i class="fa-solid fa-video"></i>
-                </button>
-                <button id="endCallBtn" class="control-btn btn-hangup" title="Raccrocher">
-                    <i class="fa-solid fa-phone-slash"></i>
-                </button>
+            <!-- Video Call Container -->
+            <div id="videoCallBox" class="video-call-box">
+                <div class="video-screen">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <div class="local-pip">
+                        <video id="localVideo" autoplay playsinline muted></video>
+                    </div>
+                </div>
+                <div class="video-controls">
+                    <button id="toggleAudioBtn" class="v-btn"><i class="fa-solid fa-microphone"></i></button>
+                    <button id="toggleVideoBtn" class="v-btn"><i class="fa-solid fa-video"></i></button>
+                    <button id="endCallBtn" class="v-btn danger"><i class="fa-solid fa-phone-slash"></i></button>
+                </div>
+            </div>
+
+            <!-- Shared Files -->
+            <div>
+                <div class="section-title"><i class="fa-solid fa-file"></i> SHARED FILES</div>
+                <ul class="shared-links-list">
+                    <li><a href="#">• Rapport_Oxalix_2025.pdf</a></li>
+                    <li><a href="#">• Budget_Project.xlsx</a></li>
+                </ul>
+            </div>
+
+            <!-- Shared Photos -->
+            <div>
+                <div class="section-title"><i class="fa-solid fa-image"></i> SHARED PHOTOS</div>
+                <div class="shared-photos-grid">
+                    <div class="photo-thumb" style="background-color: #FBCFE8;"></div>
+                    <div class="photo-thumb" style="background-color: #BAE6FD;"></div>
+                </div>
             </div>
         </div>
-
     </div>
 
     <!-- Socket.IO library -->
@@ -584,9 +764,14 @@
         const username = "{{ username }}";
         const room = "{{ room }}";
 
+        // Display user initials
+        if (username) {
+            const initials = username.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById('userInitial').textContent = initials;
+        }
+
         const socket = io.connect(window.location.origin);
 
-        // UI Elements
         const messagesDiv = document.getElementById('messages');
         const messageInputForm = document.getElementById('message_input_form');
         const messageInput = document.getElementById('message_input');
@@ -596,14 +781,12 @@
 
         const startCallBtn = document.getElementById('startCallBtn');
         const endCallBtn = document.getElementById('endCallBtn');
-        const videoPanel = document.getElementById('videoPanel');
+        const videoCallBox = document.getElementById('videoCallBox');
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
-        const videoPlaceholder = document.getElementById('videoPlaceholder');
         const toggleAudioBtn = document.getElementById('toggleAudioBtn');
         const toggleVideoBtn = document.getElementById('toggleVideoBtn');
 
-        // WebRTC variables
         let localStream = null;
         let peerConnection = null;
         let isAudioMuted = false;
@@ -617,34 +800,20 @@
         };
 
         // Popular Emojis
-        const emojis = [
-            '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇',
-            '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚',
-            '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩',
-            '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '😣', '😖',
-            '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯',
-            '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔',
-            '🤭', '🤫', '🤥', '😶', '😐', '😑', '😬', '🙄', '😯', '😦',
-            '👍', '👎', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✌️', '🤟',
-            '🤘', '👌', '🤌', '🤏', '👈', '👉', '👆', '👇', '☝️', '✋',
-            '💪', '🧠', '🫀', '👀', '🔥', '✨', '🌟', '⚡', '🎉', '🎊',
-            '❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💯'
-        ];
+        const emojis = ['😃','😂','😊','😍','👍','👏','🔥','✨','🎉','❤️','🙌','💡','😎','🚀','🙏'];
 
-        // Populate Emoji Grid
         emojis.forEach(emoji => {
-            const emojiSpan = document.createElement('span');
-            emojiSpan.className = 'emoji-item';
-            emojiSpan.textContent = emoji;
-            emojiSpan.addEventListener('click', () => {
+            const span = document.createElement('span');
+            span.className = 'emoji-item';
+            span.textContent = emoji;
+            span.addEventListener('click', () => {
                 messageInput.value += emoji;
                 messageInput.focus();
                 emojiPicker.classList.remove('active');
             });
-            emojiGrid.appendChild(emojiSpan);
+            emojiGrid.appendChild(span);
         });
 
-        // Toggle Emoji Picker
         emojiBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             emojiPicker.classList.toggle('active');
@@ -656,20 +825,16 @@
             }
         });
 
-        // Format Timestamp
-        function getCurrentTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${hours}:${minutes}`;
-        }
+        // Load DB History on start
+        fetch(`/api/history/${room}`)
+            .then(res => res.json())
+            .then(history => {
+                history.forEach(msg => appendMessage(msg));
+            })
+            .catch(err => console.error("Erreur chargement historique DB:", err));
 
-        // Socket.IO Connection & Chat logic
         socket.on('connect', function () {
-            socket.emit('join_room', {
-                username: username,
-                room: room
-            });
+            socket.emit('join_room', { username: username, room: room });
         });
 
         messageInputForm.onsubmit = function (e) {
@@ -687,160 +852,124 @@
         };
 
         socket.on('recu_msg', function (data) {
-            const isMe = data.username === username;
-            const row = document.createElement('div');
-            row.className = `message-row ${isMe ? 'me' : 'other'}`;
-
-            const authorHtml = isMe ? '' : `<div class="message-author">${escapeHtml(data.username)}</div>`;
-            row.innerHTML = `
-                ${authorHtml}
-                <div class="message-bubble">
-                    ${escapeHtml(data.message)}
-                    <div class="message-time">${getCurrentTime()}</div>
-                </div>
-            `;
-            messagesDiv.appendChild(row);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            appendMessage(data);
         });
 
         socket.on('announcement_join_room', function (data) {
             const sysMsg = document.createElement('div');
-            sysMsg.className = 'system-notification';
-            sysMsg.innerHTML = `<i class="fa-solid fa-user-plus"></i> &nbsp;<b>${escapeHtml(data.username)}</b> a rejoint la réunion.`;
+            sysMsg.className = 'system-toast';
+            sysMsg.innerHTML = `<b>${escapeHtml(data.username)}</b> a rejoint la conversation.`;
             messagesDiv.appendChild(sysMsg);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
+
+        function appendMessage(data) {
+            const isMe = data.username === username;
+            const row = document.createElement('div');
+            row.className = `message-row ${isMe ? 'me' : 'other'}`;
+
+            const initials = data.username.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            const avatarHtml = `<div class="avatar" style="width:34px;height:34px;font-size:12px;">${initials}</div>`;
+
+            row.innerHTML = `
+                ${avatarHtml}
+                <div class="message-content">
+                    <div class="message-bubble">${escapeHtml(data.message)}</div>
+                    <div class="message-meta">${data.timestamp || getCurrentTime()}</div>
+                </div>
+            `;
+            messagesDiv.appendChild(row);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        }
 
         function escapeHtml(str) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // --- WebRTC Video Call Implementation ---
-
+        // --- WebRTC Implementation ---
         async function getMediaStream() {
             if (!localStream) {
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                    localVideo.srcObject = localStream;
-                } catch (err) {
-                    console.error("Erreur d'accès à la caméra/micro:", err);
-                    alert("Impossible d'accéder à la caméra et au microphone. Veuillez vérifier vos autorisations.");
-                    throw err;
-                }
+                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                localVideo.srcObject = localStream;
             }
             return localStream;
         }
 
         function createPeerConnection() {
             if (peerConnection) return peerConnection;
-
             peerConnection = new RTCPeerConnection(rtcConfiguration);
 
-            // Add local tracks to peer connection
             if (localStream) {
-                localStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localStream);
-                });
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
             }
 
-            // Remote stream handler
-            peerConnection.ontrack = function (event) {
-                if (event.streams && event.streams[0]) {
-                    remoteVideo.srcObject = event.streams[0];
-                    videoPlaceholder.style.display = 'none';
+            peerConnection.ontrack = (e) => {
+                if (e.streams && e.streams[0]) {
+                    remoteVideo.srcObject = e.streams[0];
                 }
             };
 
-            // ICE candidate handler
-            peerConnection.onicecandidate = function (event) {
-                if (event.candidate) {
-                    socket.emit('webrtc_ice_candidate', {
-                        room: room,
-                        candidate: event.candidate
-                    });
-                }
-            };
-
-            peerConnection.onconnectionstatechange = function () {
-                if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'closed' || peerConnection.connectionState === 'failed') {
-                    videoPlaceholder.style.display = 'flex';
+            peerConnection.onicecandidate = (e) => {
+                if (e.candidate) {
+                    socket.emit('webrtc_ice_candidate', { room: room, candidate: e.candidate });
                 }
             };
 
             return peerConnection;
         }
 
-        // Start Call Click Event
         startCallBtn.addEventListener('click', async () => {
             try {
-                videoPanel.classList.add('active');
+                videoCallBox.classList.add('active');
                 await getMediaStream();
                 const pc = createPeerConnection();
-
                 const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
-
-                socket.emit('webrtc_offer', {
-                    room: room,
-                    offer: offer
-                });
+                socket.emit('webrtc_offer', { room: room, offer: offer });
             } catch (err) {
-                console.error("Erreur lors de l'initialisation de l'appel:", err);
+                console.error("Erreur d'initialisation d'appel:", err);
             }
         });
 
-        // WebRTC Signaling Handlers
-        socket.on('webrtc_offer', async function (data) {
+        socket.on('webrtc_offer', async (data) => {
             try {
-                videoPanel.classList.add('active');
+                videoCallBox.classList.add('active');
                 await getMediaStream();
                 const pc = createPeerConnection();
-
                 await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-
-                socket.emit('webrtc_answer', {
-                    room: room,
-                    answer: answer
-                });
+                socket.emit('webrtc_answer', { room: room, answer: answer });
             } catch (err) {
-                console.error("Erreur lors de la réponse WebRTC:", err);
+                console.error("Erreur WebRTC Offer:", err);
             }
         });
 
-        socket.on('webrtc_answer', async function (data) {
-            try {
-                if (peerConnection) {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                }
-            } catch (err) {
-                console.error("Erreur traitement answer WebRTC:", err);
+        socket.on('webrtc_answer', async (data) => {
+            if (peerConnection) {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
             }
         });
 
-        socket.on('webrtc_ice_candidate', async function (data) {
-            try {
-                if (peerConnection && data.candidate) {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                }
-            } catch (err) {
-                console.error("Erreur ajout ICE Candidate:", err);
+        socket.on('webrtc_ice_candidate', async (data) => {
+            if (peerConnection && data.candidate) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
         });
 
-        socket.on('webrtc_end_call', function () {
-            cleanUpCall();
-        });
+        socket.on('webrtc_end_call', () => cleanUpCall());
 
-        // Media Controls (Mute Micro / Toggle Video / Hang up)
         toggleAudioBtn.addEventListener('click', () => {
             if (localStream) {
-                const audioTrack = localStream.getAudioTracks()[0];
-                if (audioTrack) {
+                const track = localStream.getAudioTracks()[0];
+                if (track) {
                     isAudioMuted = !isAudioMuted;
-                    audioTrack.enabled = !isAudioMuted;
-                    toggleAudioBtn.classList.toggle('active-off', isAudioMuted);
+                    track.enabled = !isAudioMuted;
                     toggleAudioBtn.innerHTML = isAudioMuted ? '<i class="fa-solid fa-microphone-slash"></i>' : '<i class="fa-solid fa-microphone"></i>';
                 }
             }
@@ -848,11 +977,10 @@
 
         toggleVideoBtn.addEventListener('click', () => {
             if (localStream) {
-                const videoTrack = localStream.getVideoTracks()[0];
-                if (videoTrack) {
+                const track = localStream.getVideoTracks()[0];
+                if (track) {
                     isVideoOff = !isVideoOff;
-                    videoTrack.enabled = !isVideoOff;
-                    toggleVideoBtn.classList.toggle('active-off', isVideoOff);
+                    track.enabled = !isVideoOff;
                     toggleVideoBtn.innerHTML = isVideoOff ? '<i class="fa-solid fa-video-slash"></i>' : '<i class="fa-solid fa-video"></i>';
                 }
             }
@@ -874,16 +1002,7 @@
             }
             localVideo.srcObject = null;
             remoteVideo.srcObject = null;
-            videoPlaceholder.style.display = 'flex';
-            videoPanel.classList.remove('active');
-
-            // Reset control buttons state
-            isAudioMuted = false;
-            isVideoOff = false;
-            toggleAudioBtn.classList.remove('active-off');
-            toggleAudioBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
-            toggleVideoBtn.classList.remove('active-off');
-            toggleVideoBtn.innerHTML = '<i class="fa-solid fa-video"></i>';
+            videoCallBox.classList.remove('active');
         }
     </script>
 </body>

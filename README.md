@@ -1,104 +1,106 @@
-# OXMEMBER - Plateforme de Chat & Visioconférence Oxalix
+# OXMEMBER - Plateforme d'Échange, Historique MySQL & Visioconférence
 
-OXMEMBER est la plateforme collaborative interne d'**Oxalix**, conçue pour permettre aux employés d'échanger en temps réel via une messagerie instantanée dynamique et d'effectuer des appels vidéo (visioconférence peer-to-peer) directement depuis leur navigateur.
+**OXMEMBER** est la plateforme d'échange et de visioconférence sécurisée développée pour les collaborateurs d'**Oxalix**.
 
 ---
 
-## 🚀 Fonctionnalités principales
+## 🎨 Fonctionnalités Principales & Nouveau Design
 
-- **Authentification & Salons de discussion (Rooms) :**
-  - Connexion rapide avec un nom d'utilisateur et un numéro de salon.
-  - Salons virtuels étanches permettant le regroupement par équipes ou projets.
+- **Interface Modèle 3 Colonnes :**
+  - **Colonne de Gauche :** Titre **OXMEMBER** épuré (sans logo et sans le texte "Chat"), barre de recherche d'utilisateurs et salons avec statut en ligne.
+  - **Colonne Centrale :** En-tête de conversation avec l'interlocuteur/salon (`To: Salon #...`), historique des messages persistant, bulles de messages stylisées (jaune sable `#FFF8E7` pour les destinataires, bleu clair `#E3F2FD` pour l'utilisateur), et zone de saisie avec bouton **REPLY**.
+  - **Colonne de Droite :** Fiche profil de l'utilisateur connectée, panneau d'appel vidéo WebRTC rétractable et prévisualisation des fichiers et images partagés.
 
-- **Interface Utilisateur Moderne (Dark Mode OXMEMBER) :**
-  - Design professionnel et épuré.
-  - Différenciation claire des messages (expéditeur vs destinataires).
-  - Notifications système d'arrivée de nouveaux collaborateurs dans la salle.
-  - Horodatage automatique des messages.
+- **Persistance des Messages & Base de Données MySQL / SQLite :**
+  - Sauvegarde automatique en base de données SQL (table `messages`).
+  - Restitution immédiate de l'historique des conversations lors de la connexion à un salon via une API REST `/api/history/<room>`.
+  - Support natif de **MySQL** avec bascule automatique vers SQLite pour un démarrage rapide sans configuration externe.
+
+- **Visioconférence HD WebRTC P2P :**
+  - Appels vidéo et audio en direct sans plugin externe.
+  - Panneau d'incrustation vidéo (Picture-in-Picture) et boutons de contrôle (coupure micro, coupure caméra, raccrocher).
 
 - **Sélecteur d'Emojis (Emoji Picker) :**
-  - Intégration d'une grille d'emojis popover directement accessible depuis le champ d'écriture.
-
-- **Appel Vidéo HD (WebRTC & Socket.IO) :**
-  - Établissement de visioconférence P2P temps réel entre participants d'une même chambre.
-  - Incrustation vidéo locale (picture-in-picture) et flux distant HD.
-  - Contrôles d'appel complets : Activer/Désactiver le microphone, Activer/Désactiver la caméra, Raccrocher.
+  - Insertion rapide d'emojis dans le champ de texte via une fenêtre popover.
 
 ---
 
-## 🛠️ Environnement Requis & Prérequis
+## 🛠️ Configuration de la Base de Données MySQL
 
-- **Python :** Version 3.8 ou supérieure.
-- **Dépendances Python :**
-  - `Flask`
-  - `Flask-SocketIO`
-  - `eventlet`
+L'application supporte nativement un serveur MySQL distant ou local via **Flask-SQLAlchemy** et **PyMySQL**.
 
-- **Navigateurs recommandés :**
-  - Google Chrome, Mozilla Firefox, Microsoft Edge ou Safari (supportant WebRTC et HTML5 `getUserMedia`).
+### Variables d'environnement pour MySQL :
 
----
-
-## ⚙️ Procédure d'installation et démarrage
-
-### 1. Cloner ou télécharger le dépôt
+Pour vous connecter à votre propre instance MySQL, définissez les variables d'environnement suivantes avant de lancer l'application :
 
 ```bash
-git clone <url-du-repo>
-cd simple-chat
+export MYSQL_USER="votre_utilisateur"
+export MYSQL_PASSWORD="votre_mot_de_passe"
+export MYSQL_HOST="localhost"
+export MYSQL_DATABASE="oxmember_db"
 ```
 
-### 2. Créer et activer un environnement virtuel (recommandé)
+*Note : Si aucune variable MySQL n'est configurée, l'application crée et utilise automatiquement une base de données SQLite locale `instance/oxmember.db` sans aucune erreur.*
+
+---
+
+## ⚙️ Guide d'Installation & Démarrage Rapide
+
+### 1. Activer l'environnement virtuel
 
 ```bash
-# Sous Linux / macOS :
+# Linux / macOS
 python3 -m venv venv
 source venv/bin/activate
 
-# Sous Windows :
+# Windows
 python -m venv venv
 venv\Scripts\activate
 ```
 
-### 3. Installer les dépendances
+### 2. Installer les dépendances
 
 ```bash
 pip install -r requirement.txt
 ```
 
-*Remarque : si vous ajoutez des dépendances, vérifiez qu'elles figurent bien dans `requirement.txt`.*
-
-### 4. Lancer l'application
+### 3. Lancer le serveur d'application
 
 ```bash
 python app.py
 ```
 
-L'application démarrera par défaut sur `http://127.0.0.1:5000`.
+L'application est disponible sur `http://127.0.0.1:5000`.
 
 ---
 
-## 🧪 Guide de Test & Validation
+## 🧪 Le Meilleur Assistant de Test & Validation (Guide Complétif)
 
-1. **Test du Chat :**
-   - Ouvrez deux onglets ou fenêtres de navigateur séparés (ou deux navigateurs différents).
-   - Accédez à `http://127.0.0.1:5000/`.
-   - Dans le premier onglet, entrez le nom `Alice` et le salon `101`.
-   - Dans le second onglet, entrez le nom `Bob` et le même salon `101`.
-   - Envoyez des messages texte depuis chaque onglet pour vérifier la réception instantanée.
+Ce guide permet de tester l'intégralité du système rapidement :
 
-2. **Test des Emojis :**
-   - Cliquez sur l'icône Smile 😃 dans la barre de saisie.
-   - Sélectionnez un emoji. Il s'insère automatiquement dans votre message.
+### Scénario 1 : Validation de l'historique et de la persistance des messages (MySQL / SQLite)
+1. Ouvrez un navigateur et rendez-vous sur `http://127.0.0.1:5000`.
+2. Connectez-vous sous le nom **"John Mayers"** dans le salon **101**.
+3. Tapez le message : `"Bonjour l'équipe Oxalix, voici le premier message !"`. Cliquez sur **REPLY**.
+4. Fermez l'onglet ou rafraîchissez la page.
+5. Reconnectez-vous au salon **101** : le message précédent s'affiche immédiatement grâce au rechargement de l'historique depuis la base de données.
 
-3. **Test des Appels Vidéo WebRTC :**
-   - Dans l'un des onglets, cliquez sur le bouton **"Démarrer Appel Vidéo"** dans la barre supérieure.
-   - Autorisez l'accès à la caméra et au microphone si le navigateur le demande.
-   - L'appel se connecte automatiquement avec l'autre utilisateur présent dans le salon.
-   - Testez les boutons du panneau vidéo : coupure micro, coupure caméra et bouton raccrocher.
+### Scénario 2 : Test d'échange en temps réel multi-utilisateurs
+1. Ouvrez deux fenêtres de navigateur côte à côte.
+2. Window 1 : Nom **"John Mayers"**, Salon **101**.
+3. Window 2 : Nom **"Mike Stuart"**, Salon **101**.
+4. Transmettez des messages de part et d'autre et vérifiez :
+   - L'affichage instantané côté destinataire (bulle couleur sable `#FFF8E7`).
+   - L'affichage côté expéditeur (bulle couleur bleu clair `#E3F2FD`).
+   - L'horodatage en bas à droite de chaque message.
 
----
+### Scénario 3 : Test de l'Emoji Picker
+1. Cliquez sur l'icône Smile 😃 dans la barre d'outils inférieure.
+2. Cliquez sur l'emoji 👍 ou 🚀.
+3. Vérifiez que l'emoji s'insère dans le champ de saisie, puis envoyez-le.
 
-## 🛡️ Sécurité & Confidentialité
-
-La plateforme **OXMEMBER** est réservée à un usage professionnel interne pour les collaborateurs d'Oxalix. Les échanges audio et vidéo transitent en direct en peer-to-peer (P2P) via WebRTC.
+### Scénario 4 : Test de l'Appel Vidéo WebRTC
+1. Dans l'en-tête de discussion, cliquez sur l'icône caméra 📹.
+2. Le panneau d'appel vidéo s'ouvre sur la colonne de droite.
+3. Autorisez l'accès au micro/caméra. La vidéo locale s'incruste dans le coin inférieur droit.
+4. Testez la coupure micro, caméra et le bouton rouge pour raccrocher.
