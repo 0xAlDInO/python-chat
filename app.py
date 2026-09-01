@@ -1,7 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 from flask import Flask, render_template, request, redirect, url_for
-from flask_socketio import SocketIO, join_room
+from flask_socketio import SocketIO, join_room, emit
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -38,22 +38,22 @@ def handle_join_room_event(data):
 @socketio.on('webrtc_offer')
 def handle_webrtc_offer(data):
     # Relay WebRTC offer to other peer(s) in room
-    socketio.emit('webrtc_offer', data, room=data['room'], include_self=False)
+    emit('webrtc_offer', data, room=data['room'], include_self=False)
 
 @socketio.on('webrtc_answer')
 def handle_webrtc_answer(data):
     # Relay WebRTC answer to other peer(s) in room
-    socketio.emit('webrtc_answer', data, room=data['room'], include_self=False)
+    emit('webrtc_answer', data, room=data['room'], include_self=False)
 
 @socketio.on('webrtc_ice_candidate')
 def handle_webrtc_ice_candidate(data):
     # Relay ICE candidate to other peer(s) in room
-    socketio.emit('webrtc_ice_candidate', data, room=data['room'], include_self=False)
+    emit('webrtc_ice_candidate', data, room=data['room'], include_self=False)
 
 @socketio.on('webrtc_end_call')
 def handle_webrtc_end_call(data):
     # Relay end call signal to other peer(s) in room
-    socketio.emit('webrtc_end_call', data, room=data['room'], include_self=False)
+    emit('webrtc_end_call', data, room=data['room'], include_self=False)
 
 if __name__ == "__main__":
     import eventlet
