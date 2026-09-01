@@ -18,7 +18,8 @@ db_name = os.getenv('MYSQL_DATABASE', 'oxmember_db')
 mysql_uri = f"mysql+pymysql://{db_user}:{db_password}@{db_host}/{db_name}"
 sqlite_fallback_uri = "sqlite:///oxmember.db"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', sqlite_fallback_uri)
+default_db_uri = mysql_uri if os.getenv('MYSQL_HOST') else sqlite_fallback_uri
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', default_db_uri)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
