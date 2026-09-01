@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OXMEMBER - Espace Collaboratif Oxalix</title>
+    <title>OXMEMBER</title>
     <!-- Font Awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --primary-light: #EEF2FF;
-            --dark-bg: #0F172A;
-            --card-bg: #1E293B;
-            --text-main: #F8FAFC;
-            --text-muted: #94A3B8;
-            --border-color: #334155;
-            --accent: #06B6D4;
+            --primary-blue: #3B82F6;
+            --primary-hover: #2563EB;
+            --bg-gradient: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%);
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --input-bg: #F8FAFC;
         }
 
         * {
@@ -29,82 +28,59 @@
         }
 
         body {
-            background: radial-gradient(circle at top right, #1E1B4B, #0F172A);
+            background: var(--bg-gradient);
             min-height: 100vh;
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
             color: var(--text-main);
-            padding: 20px;
-        }
-
-        .login-card {
-            background-color: rgba(30, 41, 59, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 440px;
-            padding: 40px;
-            position: relative;
+            padding: 16px;
             overflow: hidden;
         }
 
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #4F46E5, #06B6D4, #10B981);
-        }
-
-        .brand-header {
+        .login-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 440px;
+            padding: 44px 36px;
             text-align: center;
-            margin-bottom: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            animation: fadeIn 0.3s ease-out;
         }
 
-        .brand-logo {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 16px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: white;
-            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
-            margin-bottom: 16px;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .brand-title {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-blue);
             letter-spacing: -0.5px;
-            background: linear-gradient(90deg, #FFFFFF, #94A3B8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
         }
 
         .brand-subtitle {
             color: var(--text-muted);
             font-size: 14px;
-            margin-top: 6px;
+            margin-bottom: 32px;
         }
 
         .form-group {
-            margin-bottom: 22px;
+            margin-bottom: 20px;
+            text-align: left;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #CBD5E1;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -118,40 +94,40 @@
         .input-icon {
             position: absolute;
             left: 14px;
-            color: var(--text-muted);
-            font-size: 16px;
+            color: #94A3B8;
+            font-size: 15px;
         }
 
         .form-control {
             width: 100%;
             padding: 12px 16px 12px 42px;
-            background-color: rgba(15, 23, 42, 0.6);
+            background-color: var(--input-bg);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            color: white;
-            font-size: 15px;
+            color: var(--text-main);
+            font-size: 14px;
             transition: all 0.2s ease;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
-            background-color: rgba(15, 23, 42, 0.9);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            background-color: #FFFFFF;
         }
 
         .btn-submit {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, var(--primary), #3730A3);
+            background-color: var(--primary-blue);
             border: none;
             border-radius: 10px;
             color: white;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -160,38 +136,41 @@
         }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
 
         .footer-note {
-            margin-top: 24px;
-            text-align: center;
+            margin-top: 28px;
             font-size: 12px;
             color: var(--text-muted);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 24px;
+                border-radius: 16px;
+            }
+
+            .brand-title {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="login-card">
-        <div class="brand-header">
-            <div class="brand-logo">
-                <i class="fa-solid fa-comments"></i>
-            </div>
-            <h1 class="brand-title">OXMEMBER</h1>
-            <p class="brand-subtitle">Plateforme d'échange & visioconférence Oxalix</p>
-        </div>
+        <h1 class="brand-title">OXMEMBER</h1>
+        <p class="brand-subtitle">Plateforme d'échange & visioconférence Oxalix</p>
 
         <form action="/chat" method="GET">
             <div class="form-group">
                 <label for="username">Nom d'utilisateur</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-user input-icon"></i>
-                    <input type="text" id="username" name="username" class="form-control" placeholder="ex: Jean Dupont" required autocomplete="off">
+                    <input type="text" id="username" name="username" class="form-control" placeholder="ex: John Mayers" required autocomplete="off">
                 </div>
             </div>
 
@@ -204,13 +183,13 @@
             </div>
 
             <button type="submit" class="btn-submit">
-                <span>Rejoindre la salle</span>
+                <span>Rejoindre</span>
                 <i class="fa-solid fa-arrow-right"></i>
             </button>
         </form>
 
         <div class="footer-note">
-            &copy; Oxalix — Espace d'échange sécurisé pour employés
+            &copy; Oxalix — Espace d'échange sécurisé
         </div>
     </div>
 </body>

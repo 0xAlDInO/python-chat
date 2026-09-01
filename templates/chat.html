@@ -7,7 +7,7 @@
     <!-- Font Awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-blue: #3B82F6;
@@ -37,26 +37,23 @@
         body {
             background: var(--bg-gradient);
             height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
             color: var(--text-main);
             overflow: hidden;
         }
 
-        /* App Layout Frame */
+        /* App Layout Frame - FULLSCREEN 100% WIDTH AND HEIGHT */
         .app-window {
             background-color: var(--app-bg);
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 1280px;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             display: grid;
-            grid-template-columns: 280px 1fr 280px;
+            grid-template-columns: 280px 1fr 300px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            position: relative;
         }
 
         /* ---------------- LEFT SIDEBAR ---------------- */
@@ -65,6 +62,8 @@
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            z-index: 10;
+            transition: transform 0.3s ease;
         }
 
         .left-header {
@@ -217,7 +216,8 @@
             display: flex;
             flex-direction: column;
             background-color: var(--chat-bg);
-            height: 100%;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .chat-header {
@@ -226,6 +226,23 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: #FFFFFF;
+        }
+
+        .header-left-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mobile-nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: var(--primary-blue);
+            cursor: pointer;
+            padding: 6px;
         }
 
         .chat-target-info {
@@ -245,7 +262,7 @@
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             color: var(--primary-blue);
         }
 
@@ -272,6 +289,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            background-color: #FFFFFF;
         }
 
         .date-divider {
@@ -358,6 +376,7 @@
             padding: 16px 24px 20px;
             border-top: 1px solid var(--border-color);
             position: relative;
+            background-color: #FFFFFF;
         }
 
         .input-box-wrapper {
@@ -462,6 +481,8 @@
             flex-direction: column;
             gap: 24px;
             overflow-y: auto;
+            z-index: 10;
+            transition: transform 0.3s ease;
         }
 
         .profile-card {
@@ -619,13 +640,79 @@
             object-fit: cover;
         }
 
-        /* Responsive */
+        /* ---------------- RESPONSIVE BREAKPOINTS ---------------- */
+
+        /* Tablet (768px - 1024px) */
         @media (max-width: 1024px) {
             .app-window {
-                grid-template-columns: 260px 1fr;
+                grid-template-columns: 240px 1fr;
             }
             .sidebar-right {
-                display: none;
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+                transform: translateX(100%);
+            }
+            .sidebar-right.mobile-open {
+                transform: translateX(0);
+            }
+        }
+
+        /* Mobile (< 768px) */
+        @media (max-width: 768px) {
+            .app-window {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-nav-toggle {
+                display: block;
+            }
+
+            .sidebar-left {
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+                transform: translateX(-100%);
+            }
+
+            .sidebar-left.mobile-open {
+                transform: translateX(0);
+            }
+
+            .sidebar-right {
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                width: 280px;
+                box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+                transform: translateX(100%);
+            }
+
+            .sidebar-right.mobile-open {
+                transform: translateX(0);
+            }
+
+            .message-row {
+                max-width: 90%;
+            }
+
+            .chat-header {
+                padding: 14px 16px;
+            }
+
+            .messages-area {
+                padding: 16px;
+            }
+
+            .chat-input-container {
+                padding: 12px 16px;
             }
         }
     </style>
@@ -634,7 +721,7 @@
 
     <div class="app-window">
         <!-- 1. LEFT SIDEBAR -->
-        <div class="sidebar-left">
+        <div id="sidebarLeft" class="sidebar-left">
             <div class="left-header">
                 <div class="brand-title-text">OXMEMBER</div>
                 <div class="nav-tabs">
@@ -650,7 +737,7 @@
             </div>
 
             <div class="contacts-list">
-                <div class="contact-item active">
+                <div class="contact-item active" onclick="closeMobileSidebars()">
                     <div class="avatar-container">
                         <div class="avatar">JM</div>
                         <div class="status-dot"></div>
@@ -670,14 +757,21 @@
         <div class="chat-main">
             <!-- Header -->
             <div class="chat-header">
-                <div class="chat-target-info">
-                    <span class="to-label">To:</span>
-                    <span>Salon #{{ room }}</span>
+                <div class="header-left-group">
+                    <button id="toggleLeftSidebar" class="mobile-nav-toggle" title="Menu contacts">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="chat-target-info">
+                        <span class="to-label">To:</span>
+                        <span>Salon #{{ room }}</span>
+                    </div>
                 </div>
+
                 <div class="header-controls">
-                    <button class="action-icon-btn" title="Recherche dans le chat"><i class="fa-regular fa-comment-dots"></i></button>
-                    <button class="action-icon-btn" title="Appel vocal"><i class="fa-solid fa-phone"></i></button>
+                    <button class="action-icon-btn" title="Recherche"><i class="fa-regular fa-comment-dots"></i></button>
                     <button id="startCallBtn" class="action-icon-btn" title="Démarrer l'Appel Vidéo"><i class="fa-solid fa-video"></i></button>
+                    <button id="toggleRightSidebar" class="action-icon-btn" title="Profil & Info"><i class="fa-solid fa-circle-info"></i></button>
+                    <a href="/" class="action-icon-btn" title="Quitter" style="color: var(--text-light);"><i class="fa-solid fa-right-from-bracket"></i></a>
                 </div>
             </div>
 
@@ -709,7 +803,7 @@
         </div>
 
         <!-- 3. RIGHT SIDEBAR -->
-        <div class="sidebar-right">
+        <div id="sidebarRight" class="sidebar-right">
             <!-- Profile Card -->
             <div class="profile-card">
                 <div class="profile-avatar" id="userInitial">OX</div>
@@ -768,6 +862,27 @@
         if (username) {
             const initials = username.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             document.getElementById('userInitial').textContent = initials;
+        }
+
+        // Mobile Drawers Toggle
+        const sidebarLeft = document.getElementById('sidebarLeft');
+        const sidebarRight = document.getElementById('sidebarRight');
+        const toggleLeftBtn = document.getElementById('toggleLeftSidebar');
+        const toggleRightBtn = document.getElementById('toggleRightSidebar');
+
+        toggleLeftBtn.addEventListener('click', () => {
+            sidebarLeft.classList.toggle('mobile-open');
+            sidebarRight.classList.remove('mobile-open');
+        });
+
+        toggleRightBtn.addEventListener('click', () => {
+            sidebarRight.classList.toggle('mobile-open');
+            sidebarLeft.classList.remove('mobile-open');
+        });
+
+        function closeMobileSidebars() {
+            sidebarLeft.classList.remove('mobile-open');
+            sidebarRight.classList.remove('mobile-open');
         }
 
         const socket = io.connect(window.location.origin);
@@ -926,6 +1041,9 @@
         startCallBtn.addEventListener('click', async () => {
             try {
                 videoCallBox.classList.add('active');
+                if (window.innerWidth <= 1024) {
+                    sidebarRight.classList.add('mobile-open');
+                }
                 await getMediaStream();
                 const pc = createPeerConnection();
                 const offer = await pc.createOffer();
@@ -939,6 +1057,9 @@
         socket.on('webrtc_offer', async (data) => {
             try {
                 videoCallBox.classList.add('active');
+                if (window.innerWidth <= 1024) {
+                    sidebarRight.classList.add('mobile-open');
+                }
                 await getMediaStream();
                 const pc = createPeerConnection();
                 await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
