@@ -1,82 +1,196 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask Chat</title>
+    <title>OXMEMBER</title>
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-blue: #3B82F6;
+            --primary-hover: #2563EB;
+            --bg-gradient: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%);
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+            --input-bg: #F8FAFC;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            color: var(--text-main);
+            padding: 16px;
+            overflow: hidden;
         }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
+
+        .login-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
             width: 100%;
-        }
-        h1 {
+            max-width: 440px;
+            padding: 44px 36px;
             text-align: center;
-            color: #333;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            animation: fadeIn 0.3s ease-out;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .brand-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        .brand-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 32px;
+        }
+
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: left;
         }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .form-group input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
-        .form-group input[type="text"] {
-            /* Additional styling for text inputs */
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: #94A3B8;
+            font-size: 15px;
         }
-        .form-group input[type="number"] {
-            /* Additional styling for number inputs */
-        }
-        button {
+
+        .form-control {
             width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
+            padding: 12px 16px 12px 42px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 14px;
+            transition: all 0.2s ease;
         }
-        button:hover {
-            background-color: #0056b3;
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+            background-color: #FFFFFF;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-blue);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+
+        .footer-note {
+            margin-top: 28px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 32px 24px;
+                border-radius: 16px;
+            }
+
+            .brand-title {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Join Chat</h1>
-        <form action="/chat">
+    <div class="login-card">
+        <h1 class="brand-title">OXMEMBER</h1>
+        <p class="brand-subtitle">Plateforme d'échange & visioconférence Oxalix</p>
+
+        <form action="/chat" method="GET">
             <div class="form-group">
-                <label for="username">Entre votre nom d'utilisateur</label>
-                <input type="text" id="username" name="username" required>
+                <label for="username">Nom d'utilisateur</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-user input-icon"></i>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="ex: John Mayers" required autocomplete="off">
+                </div>
             </div>
+
             <div class="form-group">
-                <label for="room">Identifiant du chat</label>
-                <input type="number" id="room" name="room" required>
+                <label for="room">ID du Salon / Chambre</label>
+                <div class="input-wrapper">
+                    <i class="fa-solid fa-hashtag input-icon"></i>
+                    <input type="number" id="room" name="room" class="form-control" placeholder="ex: 101" required autocomplete="off">
+                </div>
             </div>
-            <button type="submit">Submit</button>
+
+            <button type="submit" class="btn-submit">
+                <span>Rejoindre</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
         </form>
+
+        <div class="footer-note">
+            &copy; Oxalix — Espace d'échange sécurisé
+        </div>
     </div>
 </body>
 </html>
