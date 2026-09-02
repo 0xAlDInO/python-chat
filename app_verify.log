@@ -59,3 +59,29 @@ https://eventlet.readthedocs.io/en/latest/asyncio/migration.html
 127.0.0.1 - - [02/Sep/2026 11:54:08] "GET /socket.io/?EIO=4&transport=polling&t=Q1X-2SZ&sid=4ZbA-CsreS2sRlB-AAAG HTTP/1.1" 200 181 0.000148
 127.0.0.1 - - [02/Sep/2026 11:54:13] "GET /socket.io/?EIO=4&transport=websocket&sid=EJ_1RHA8ic0CZ0BIAAAE HTTP/1.1" 200 0 7.091346
 127.0.0.1 - - [02/Sep/2026 11:54:13] "GET /socket.io/?EIO=4&transport=websocket&sid=4ZbA-CsreS2sRlB-AAAG HTTP/1.1" 200 0 5.551642
+(405593) accepted ('127.0.0.1', 33234)
+127.0.0.1 - - [02/Sep/2026 12:07:50] "GET / HTTP/1.1" 200 6031 0.060058
+127.0.0.1 - - [02/Sep/2026 12:07:51] "GET /chat?username=Alice&room=101 HTTP/1.1" 200 45307 0.014653
+127.0.0.1 - - [02/Sep/2026 12:07:51] "GET /socket.io.js HTTP/1.1" 200 185297 0.028408
+127.0.0.1 - - [02/Sep/2026 12:07:51] "GET /socket.io/?EIO=4&transport=polling&t=Q1Y1BXX HTTP/1.1" 200 300 0.017020
+(405593) accepted ('127.0.0.1', 33248)
+127.0.0.1 - - [02/Sep/2026 12:07:51] "GET /api/history/101 HTTP/1.1" 200 134 0.125200
+127.0.0.1 - - [02/Sep/2026 12:07:51] "POST /socket.io/?EIO=4&transport=polling&t=Q1Y1BY1&sid=PuciboPhQBPM2996AAAI HTTP/1.1" 200 219 0.007695
+(405593) accepted ('127.0.0.1', 33252)
+(405593) accepted ('127.0.0.1', 33264)
+127.0.0.1 - - [02/Sep/2026 12:07:51] "GET /socket.io/?EIO=4&transport=polling&t=Q1Y1BYA&sid=PuciboPhQBPM2996AAAI HTTP/1.1" 200 181 0.000328
+127.0.0.1 - - [02/Sep/2026 12:07:51] "GET /socket.io/?EIO=4&transport=polling&t=Q1Y1BaE&sid=PuciboPhQBPM2996AAAI HTTP/1.1" 200 181 0.000191
+(405593) accepted ('127.0.0.1', 33274)
+127.0.0.1 - - [02/Sep/2026 12:07:52] "GET / HTTP/1.1" 200 6031 0.000897
+127.0.0.1 - - [02/Sep/2026 12:07:53] "GET /chat?username=Bob&room=101 HTTP/1.1" 200 45303 0.002226
+127.0.0.1 - - [02/Sep/2026 12:07:53] "GET /socket.io.js HTTP/1.1" 200 185297 0.001734
+127.0.0.1 - - [02/Sep/2026 12:07:53] "GET /socket.io/?EIO=4&transport=polling&t=Q1Y1B-H HTTP/1.1" 200 300 0.000429
+(405593) accepted ('127.0.0.1', 33278)
+127.0.0.1 - - [02/Sep/2026 12:07:53] "GET /api/history/101 HTTP/1.1" 200 134 0.001953
+127.0.0.1 - - [02/Sep/2026 12:07:53] "POST /socket.io/?EIO=4&transport=polling&t=Q1Y1B-e&sid=NgTzG_xwrZ2qYIrQAAAK HTTP/1.1" 200 219 0.000367
+(405593) accepted ('127.0.0.1', 33292)
+127.0.0.1 - - [02/Sep/2026 12:07:53] "GET /socket.io/?EIO=4&transport=polling&t=Q1Y1B-i&sid=NgTzG_xwrZ2qYIrQAAAK HTTP/1.1" 200 213 0.000285
+127.0.0.1 - - [02/Sep/2026 12:07:53] "POST /socket.io/?EIO=4&transport=polling&t=Q1Y1B-_&sid=NgTzG_xwrZ2qYIrQAAAK HTTP/1.1" 200 219 0.000499
+127.0.0.1 - - [02/Sep/2026 12:07:53] "GET /socket.io/?EIO=4&transport=polling&t=Q1Y1B_0&sid=NgTzG_xwrZ2qYIrQAAAK HTTP/1.1" 200 181 0.000155
+127.0.0.1 - - [02/Sep/2026 12:07:59] "GET /socket.io/?EIO=4&transport=websocket&sid=PuciboPhQBPM2996AAAI HTTP/1.1" 200 0 7.221484
+127.0.0.1 - - [02/Sep/2026 12:07:59] "GET /socket.io/?EIO=4&transport=websocket&sid=NgTzG_xwrZ2qYIrQAAAK HTTP/1.1" 200 0 5.590027
