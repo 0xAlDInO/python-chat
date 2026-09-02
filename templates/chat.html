@@ -496,101 +496,6 @@
             background-color: #F1F5F9;
         }
 
-        /* Call Invitation Modal / Overlay */
-        .call-modal-overlay {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .call-modal-overlay.active {
-            display: flex;
-            animation: fadeIn 0.2s ease-out;
-        }
-
-        .call-modal-card {
-            background: #FFFFFF;
-            border-radius: 20px;
-            padding: 32px 28px;
-            text-align: center;
-            width: 320px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
-
-        .call-modal-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background-color: #DBEAFE;
-            color: var(--primary-blue);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-        }
-
-        .call-modal-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 4px;
-        }
-
-        .call-modal-sub {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 24px;
-        }
-
-        .call-modal-actions {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-        }
-
-        .btn-call-action {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.15s;
-        }
-
-        .btn-call-action:hover {
-            transform: scale(1.1);
-        }
-
-        .btn-accept {
-            background-color: var(--online-green);
-        }
-
-        .btn-decline {
-            background-color: var(--danger);
-        }
-
         /* ---------------- RIGHT SIDEBAR ---------------- */
         .sidebar-right {
             background-color: var(--sidebar-right-bg);
@@ -598,7 +503,7 @@
             padding: 24px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
             overflow-y: auto;
             z-index: 10;
             transition: transform 0.3s ease;
@@ -610,43 +515,115 @@
             align-items: center;
             text-align: center;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 20px;
+            padding-bottom: 16px;
         }
 
         .profile-avatar {
-            width: 72px;
-            height: 72px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background-color: #DBEAFE;
             color: var(--primary-blue);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .profile-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--text-main);
         }
 
         .profile-location {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-light);
             text-transform: uppercase;
             font-weight: 600;
             margin-top: 2px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
-        .profile-socials {
+        /* Calls Queue Section in Right Sidebar */
+        .calls-queue-box {
             display: flex;
-            gap: 12px;
-            color: var(--primary-blue);
-            font-size: 14px;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .empty-calls-hint {
+            font-size: 12px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .call-card {
+            background-color: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            transition: box-shadow 0.15s;
+        }
+
+        .call-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .call-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .call-card-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .call-badge {
+            font-size: 10px;
+            font-weight: 700;
+            background-color: #ECFDF5;
+            color: var(--online-green);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .call-participants {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-join-call {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: var(--online-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+
+        .btn-join-call:hover {
+            background-color: #059669;
         }
 
         /* Video Call Panel */
@@ -726,7 +703,7 @@
             color: var(--text-light);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -879,23 +856,6 @@
 
         <!-- 2. MAIN CHAT AREA -->
         <div class="chat-main">
-            <!-- Incoming Call Modal Overlay -->
-            <div id="incomingCallModal" class="call-modal-overlay">
-                <div class="call-modal-card">
-                    <div class="call-modal-avatar" id="callerInitials">OX</div>
-                    <div class="call-modal-title" id="callerNameText">Appel Vidéo Entrant</div>
-                    <div class="call-modal-sub">souhaite démarrer un appel vidéo avec vous</div>
-                    <div class="call-modal-actions">
-                        <button id="acceptCallBtn" class="btn-call-action btn-accept" title="Accepter l'appel">
-                            <i class="fa-solid fa-phone"></i>
-                        </button>
-                        <button id="declineCallBtn" class="btn-call-action btn-decline" title="Refuser l'appel">
-                            <i class="fa-solid fa-phone-slash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Header -->
             <div class="chat-header">
                 <div class="header-left-group">
@@ -910,7 +870,7 @@
 
                 <div class="header-controls">
                     <button class="action-icon-btn" title="Recherche"><i class="fa-regular fa-comment-dots"></i></button>
-                    <button id="startCallBtn" class="action-icon-btn" title="Démarrer l'Appel Vidéo"><i class="fa-solid fa-video"></i></button>
+                    <button id="startCallBtn" class="action-icon-btn" title="Démarrer un Appel Vidéo"><i class="fa-solid fa-video"></i></button>
                     <button id="toggleRightSidebar" class="action-icon-btn" title="Profil & Info"><i class="fa-solid fa-circle-info"></i></button>
                     <a href="/" class="action-icon-btn" title="Quitter" style="color: var(--text-light);"><i class="fa-solid fa-right-from-bracket"></i></a>
                 </div>
@@ -950,14 +910,9 @@
                 <div class="profile-avatar" id="userInitial">OX</div>
                 <div class="profile-name" id="profileUsername">{{ username }}</div>
                 <div class="profile-location">Membre Oxalix</div>
-                <div class="profile-socials">
-                    <i class="fa-brands fa-facebook-f"></i>
-                    <i class="fa-brands fa-twitter"></i>
-                    <i class="fa-brands fa-linkedin-in"></i>
-                </div>
             </div>
 
-            <!-- Video Call Container -->
+            <!-- Active Video Call Screen (When participating) -->
             <div id="videoCallBox" class="video-call-box">
                 <div class="video-screen">
                     <video id="remoteVideo" autoplay playsinline></video>
@@ -968,7 +923,15 @@
                 <div class="video-controls">
                     <button id="toggleAudioBtn" class="v-btn"><i class="fa-solid fa-microphone"></i></button>
                     <button id="toggleVideoBtn" class="v-btn"><i class="fa-solid fa-video"></i></button>
-                    <button id="endCallBtn" class="v-btn danger"><i class="fa-solid fa-phone-slash"></i></button>
+                    <button id="endCallBtn" class="v-btn danger" title="Quitter l'appel"><i class="fa-solid fa-phone-slash"></i></button>
+                </div>
+            </div>
+
+            <!-- Calls Queue Section in Right Sidebar -->
+            <div>
+                <div class="section-title"><i class="fa-solid fa-video"></i> APPELS EN COURS</div>
+                <div id="activeCallsContainer" class="calls-queue-box">
+                    <div class="empty-calls-hint">Aucun appel en cours.</div>
                 </div>
             </div>
 
@@ -1043,18 +1006,13 @@
         const remoteVideo = document.getElementById('remoteVideo');
         const toggleAudioBtn = document.getElementById('toggleAudioBtn');
         const toggleVideoBtn = document.getElementById('toggleVideoBtn');
-
-        const incomingCallModal = document.getElementById('incomingCallModal');
-        const callerNameText = document.getElementById('callerNameText');
-        const callerInitials = document.getElementById('callerInitials');
-        const acceptCallBtn = document.getElementById('acceptCallBtn');
-        const declineCallBtn = document.getElementById('declineCallBtn');
+        const activeCallsContainer = document.getElementById('activeCallsContainer');
 
         let localStream = null;
         let peerConnection = null;
+        let currentCallId = null;
         let isAudioMuted = false;
         let isVideoOff = false;
-        let pendingOfferData = null;
 
         const rtcConfiguration = {
             iceServers: [
@@ -1211,7 +1169,7 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // --- WebRTC Implementation ---
+        // --- WebRTC Media Stream ---
         async function getMediaStream() {
             if (!localStream) {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -1243,62 +1201,70 @@
             return peerConnection;
         }
 
-        // Caller initiates call -> Emits call request
-        startCallBtn.addEventListener('click', async () => {
-            try {
-                videoCallBox.classList.add('active');
-                if (window.innerWidth <= 1024) {
-                    sidebarRight.classList.add('mobile-open');
-                }
-                await getMediaStream();
-                socket.emit('webrtc_call_request', {
-                    room: room,
-                    caller: username
-                });
-            } catch (err) {
-                console.error("Erreur d'initialisation d'appel:", err);
+        // --- Right Sidebar Call Queue ---
+
+        // Top button creates a new call listing in the queue
+        startCallBtn.addEventListener('click', () => {
+            socket.emit('create_call', { room: room, username: username });
+        });
+
+        socket.on('call_created', async (callData) => {
+            if (callData.host === username) {
+                await joinCall(callData.call_id);
             }
         });
 
-        // Receiver gets call request -> Displays Incoming Call Modal
-        socket.on('webrtc_call_request', (data) => {
-            if (data.caller !== username) {
-                callerNameText.textContent = `Appel entrant de ${data.caller}`;
-                callerInitials.textContent = data.caller.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                incomingCallModal.classList.add('active');
-            }
+        socket.on('active_calls_update', (calls) => {
+            renderActiveCalls(calls);
         });
 
-        // Receiver accepts call -> Gets media and sends WebRTC offer
-        acceptCallBtn.addEventListener('click', async () => {
-            try {
-                incomingCallModal.classList.remove('active');
-                videoCallBox.classList.add('active');
-                if (window.innerWidth <= 1024) {
-                    sidebarRight.classList.add('mobile-open');
-                }
-                await getMediaStream();
-                const pc = createPeerConnection();
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                socket.emit('webrtc_offer', { room: room, offer: offer });
-            } catch (err) {
-                console.error("Erreur lors de l'acceptation de l'appel:", err);
+        function renderActiveCalls(calls) {
+            activeCallsContainer.innerHTML = '';
+            if (!calls || calls.length === 0) {
+                activeCallsContainer.innerHTML = '<div class="empty-calls-hint">Aucun appel en cours.</div>';
+                return;
             }
-        });
 
-        // Receiver declines call
-        declineCallBtn.addEventListener('click', () => {
-            incomingCallModal.classList.remove('active');
-            socket.emit('webrtc_call_declined', { room: room, username: username });
-        });
+            calls.forEach(call => {
+                const isParticipating = call.participants.includes(username);
+                const card = document.createElement('div');
+                card.className = 'call-card';
+                card.innerHTML = `
+                    <div class="call-card-header">
+                        <span class="call-card-title"><i class="fa-solid fa-video"></i> ${escapeHtml(call.title)}</span>
+                        <span class="call-badge">${call.participants.length} en ligne</span>
+                    </div>
+                    <div class="call-participants">
+                        <i class="fa-solid fa-users"></i> ${call.participants.map(p => escapeHtml(p)).join(', ')}
+                    </div>
+                    ${!isParticipating ? `
+                        <button class="btn-join-call" onclick="joinCall('${call.call_id}')">
+                            <i class="fa-solid fa-phone"></i> Rejoindre
+                        </button>
+                    ` : `
+                        <div style="font-size:11px; color:var(--online-green); font-weight:700;"><i class="fa-solid fa-circle-check"></i> Vous êtes dans cet appel</div>
+                    `}
+                `;
+                activeCallsContainer.appendChild(card);
+            });
+        }
 
-        socket.on('webrtc_call_declined', (data) => {
-            if (data.username !== username) {
-                alert(`L'appel a été refusé par ${data.username}.`);
-                cleanUpCall();
+        async function joinCall(callId) {
+            currentCallId = callId;
+            videoCallBox.classList.add('active');
+            if (window.innerWidth <= 1024) {
+                sidebarRight.classList.add('mobile-open');
             }
-        });
+            await getMediaStream();
+            const pc = createPeerConnection();
+
+            socket.emit('join_call', { room: room, call_id: callId, username: username });
+
+            // Create WebRTC offer to connect with peers in call
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            socket.emit('webrtc_offer', { room: room, offer: offer, call_id: callId });
+        }
 
         socket.on('webrtc_offer', async (data) => {
             try {
@@ -1307,7 +1273,7 @@
                 await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                socket.emit('webrtc_answer', { room: room, answer: answer });
+                socket.emit('webrtc_answer', { room: room, answer: answer, call_id: data.call_id });
             } catch (err) {
                 console.error("Erreur WebRTC Offer:", err);
             }
@@ -1324,8 +1290,6 @@
                 await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
         });
-
-        socket.on('webrtc_end_call', () => cleanUpCall());
 
         toggleAudioBtn.addEventListener('click', () => {
             if (localStream) {
@@ -1349,8 +1313,11 @@
             }
         });
 
+        // Leaving a call only disconnects local user and does NOT close the call for others
         endCallBtn.addEventListener('click', () => {
-            socket.emit('webrtc_end_call', { room: room });
+            if (currentCallId) {
+                socket.emit('leave_call', { room: room, call_id: currentCallId, username: username });
+            }
             cleanUpCall();
         });
 
@@ -1366,7 +1333,7 @@
             localVideo.srcObject = null;
             remoteVideo.srcObject = null;
             videoCallBox.classList.remove('active');
-            incomingCallModal.classList.remove('active');
+            currentCallId = null;
         }
     </script>
 </body>

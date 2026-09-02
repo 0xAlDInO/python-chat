@@ -2,6 +2,7 @@ import eventlet
 eventlet.monkey_patch()
 
 import os
+import time
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
 from flask_socketio import SocketIO, join_room, emit
@@ -31,6 +32,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
+
+# Active calls state in memory: { call_id: { 'call_id': id, 'room': room, 'host': host, 'participants': [user1, user2] } }
+active_calls = {}
 
 # Database Models
 class Message(db.Model):
@@ -104,6 +108,13 @@ def get_room_history(room):
     messages = Message.query.filter_by(room=str(room)).order_by(Message.timestamp.asc()).all()
     return jsonify([msg.to_dict() for msg in messages])
 
+def get_room_calls(room):
+    return [c for c in active_calls.values() if str(c['room']) == str(room)]
+
+def broadcast_room_calls(room):
+    calls = get_room_calls(room)
+    socketio.emit('active_calls_update', calls, room=str(room))
+
 @socketio.on('envoie_message')
 def handle_send_message_event(data):
     app.logger.info(f"{data['username']} a envoyé un message au room {data['room']}: {data['message']}")
@@ -127,14 +138,58 @@ def handle_join_room_event(data):
     app.logger.info(f"{data['username']} a rejoint le room {data['room']}")
     join_room(data['room'])
     socketio.emit('announcement_join_room', data, room=data['room'])
+    # Send current active calls in room to joining user
+    emit('active_calls_update', get_room_calls(data['room']))
 
-@socketio.on('webrtc_call_request')
-def handle_webrtc_call_request(data):
-    emit('webrtc_call_request', data, room=data['room'], include_self=False)
+# Call Queue & Room Video Calling Handlers
+@socketio.on('create_call')
+def handle_create_call(data):
+    room = str(data['room'])
+    caller = data['username']
+    call_id = f"call_{int(time.time()*1000)}"
 
-@socketio.on('webrtc_call_declined')
-def handle_webrtc_call_declined(data):
-    emit('webrtc_call_declined', data, room=data['room'], include_self=False)
+    active_calls[call_id] = {
+        'call_id': call_id,
+        'room': room,
+        'host': caller,
+        'title': f"Appel de {caller}",
+        'participants': [caller]
+    }
+
+    broadcast_room_calls(room)
+    emit('call_created', active_calls[call_id])
+
+@socketio.on('join_call')
+def handle_join_call(data):
+    room = str(data['room'])
+    call_id = data['call_id']
+    username = data['username']
+
+    if call_id in active_calls:
+        if username not in active_calls[call_id]['participants']:
+            active_calls[call_id]['participants'].append(username)
+        broadcast_room_calls(room)
+        # Notify existing participants in this call that a new user joined
+        emit('user_joined_call', {'call_id': call_id, 'username': username, 'participants': active_calls[call_id]['participants']}, room=room)
+
+@socketio.on('leave_call')
+def handle_leave_call(data):
+    room = str(data['room'])
+    call_id = data['call_id']
+    username = data['username']
+
+    if call_id in active_calls:
+        if username in active_calls[call_id]['participants']:
+            active_calls[call_id]['participants'].remove(username)
+
+        # Notify others in room that this user left this call
+        emit('user_left_call', {'call_id': call_id, 'username': username}, room=room)
+
+        # If no participants left, delete the call
+        if len(active_calls[call_id]['participants']) == 0:
+            del active_calls[call_id]
+
+        broadcast_room_calls(room)
 
 @socketio.on('webrtc_offer')
 def handle_webrtc_offer(data):
@@ -147,10 +202,6 @@ def handle_webrtc_answer(data):
 @socketio.on('webrtc_ice_candidate')
 def handle_webrtc_ice_candidate(data):
     emit('webrtc_ice_candidate', data, room=data['room'], include_self=False)
-
-@socketio.on('webrtc_end_call')
-def handle_webrtc_end_call(data):
-    emit('webrtc_end_call', data, room=data['room'], include_self=False)
 
 if __name__ == "__main__":
     import eventlet
