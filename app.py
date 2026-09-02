@@ -188,14 +188,18 @@ def handle_leave_call(data):
     username = data['username']
 
     if call_id in active_calls:
-        if username in active_calls[call_id]['participants']:
-            active_calls[call_id]['participants'].remove(username)
+        call = active_calls[call_id]
 
-        emit('user_left_call', {'call_id': call_id, 'username': username}, room=room)
-
-        # Delete call if empty
-        if len(active_calls[call_id]['participants']) == 0:
+        # If the creator/host leaves, terminate the call for everyone
+        if username == call['host']:
+            emit('call_ended', {'call_id': call_id, 'host': username}, room=room)
             del active_calls[call_id]
+        else:
+            if username in call['participants']:
+                call['participants'].remove(username)
+            emit('user_left_call', {'call_id': call_id, 'username': username}, room=room)
+            if len(call['participants']) == 0:
+                del active_calls[call_id]
 
         broadcast_room_calls(room)
 

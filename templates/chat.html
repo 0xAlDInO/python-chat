@@ -1431,6 +1431,13 @@
             removePeerStreamTile(data.username);
         });
 
+        socket.on('call_ended', (data) => {
+            if (currentCallId === data.call_id) {
+                alert(`L'appel a été terminé par l'organisateur (${data.host}).`);
+                cleanUpCall();
+            }
+        });
+
         toggleAudioBtn.addEventListener('click', () => {
             if (localStream) {
                 const track = localStream.getAudioTracks()[0];
