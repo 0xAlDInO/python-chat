@@ -128,6 +128,14 @@ def handle_join_room_event(data):
     join_room(data['room'])
     socketio.emit('announcement_join_room', data, room=data['room'])
 
+@socketio.on('webrtc_call_request')
+def handle_webrtc_call_request(data):
+    emit('webrtc_call_request', data, room=data['room'], include_self=False)
+
+@socketio.on('webrtc_call_declined')
+def handle_webrtc_call_declined(data):
+    emit('webrtc_call_declined', data, room=data['room'], include_self=False)
+
 @socketio.on('webrtc_offer')
 def handle_webrtc_offer(data):
     emit('webrtc_offer', data, room=data['room'], include_self=False)
