@@ -33,7 +33,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
 
-# Active calls state in memory: { call_id: { 'call_id': id, 'room': room, 'host': host, 'participants': [user1, user2] } }
+# Active calls state in memory: { call_id: { 'call_id': id, 'room': room, 'host': host, 'type': 'video'|'audio', 'participants': [user1, user2] } }
 active_calls = {}
 
 # Database Models
@@ -141,18 +141,21 @@ def handle_join_room_event(data):
     # Send current active calls in room to joining user
     emit('active_calls_update', get_room_calls(data['room']))
 
-# Call Queue & Room Video Calling Handlers
+# Call Queue & Multi-Party WebRTC Signaling Handlers
 @socketio.on('create_call')
 def handle_create_call(data):
     room = str(data['room'])
     caller = data['username']
+    call_type = data.get('call_type', 'video') # 'video' or 'audio'
     call_id = f"call_{int(time.time()*1000)}"
 
+    type_label = "Vidéo" if call_type == 'video' else "Audio"
     active_calls[call_id] = {
         'call_id': call_id,
         'room': room,
         'host': caller,
-        'title': f"Appel de {caller}",
+        'call_type': call_type,
+        'title': f"Appel {type_label} de {caller}",
         'participants': [caller]
     }
 
@@ -168,9 +171,15 @@ def handle_join_call(data):
     if call_id in active_calls:
         if username not in active_calls[call_id]['participants']:
             active_calls[call_id]['participants'].append(username)
+
         broadcast_room_calls(room)
-        # Notify existing participants in this call that a new user joined
-        emit('user_joined_call', {'call_id': call_id, 'username': username, 'participants': active_calls[call_id]['participants']}, room=room)
+        # Broadcast to everyone in call that a new user joined so existing peers can initiate WebRTC peer connections
+        emit('user_joined_call', {
+            'call_id': call_id,
+            'joined_user': username,
+            'participants': active_calls[call_id]['participants'],
+            'call_type': active_calls[call_id]['call_type']
+        }, room=room)
 
 @socketio.on('leave_call')
 def handle_leave_call(data):
@@ -182,26 +191,19 @@ def handle_leave_call(data):
         if username in active_calls[call_id]['participants']:
             active_calls[call_id]['participants'].remove(username)
 
-        # Notify others in room that this user left this call
         emit('user_left_call', {'call_id': call_id, 'username': username}, room=room)
 
-        # If no participants left, delete the call
+        # Delete call if empty
         if len(active_calls[call_id]['participants']) == 0:
             del active_calls[call_id]
 
         broadcast_room_calls(room)
 
-@socketio.on('webrtc_offer')
-def handle_webrtc_offer(data):
-    emit('webrtc_offer', data, room=data['room'], include_self=False)
-
-@socketio.on('webrtc_answer')
-def handle_webrtc_answer(data):
-    emit('webrtc_answer', data, room=data['room'], include_self=False)
-
-@socketio.on('webrtc_ice_candidate')
-def handle_webrtc_ice_candidate(data):
-    emit('webrtc_ice_candidate', data, room=data['room'], include_self=False)
+# Targeted WebRTC Peer-to-Peer Signaling
+@socketio.on('webrtc_signal')
+def handle_webrtc_signal(data):
+    # Route signal (offer, answer, candidate) to specific target peer or broadcast to room
+    emit('webrtc_signal', data, room=data['room'], include_self=False)
 
 if __name__ == "__main__":
     import eventlet

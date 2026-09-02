@@ -51,7 +51,7 @@
             width: 100vw;
             height: 100vh;
             display: grid;
-            grid-template-columns: 280px 1fr 300px;
+            grid-template-columns: 280px 1fr 320px;
             overflow: hidden;
             position: relative;
         }
@@ -263,7 +263,7 @@
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             color: var(--primary-blue);
         }
 
@@ -568,7 +568,6 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-
             transition: box-shadow 0.15s;
         }
 
@@ -586,6 +585,15 @@
             font-size: 13px;
             font-weight: 700;
             color: var(--text-main);
+        }
+
+        .call-type-badge {
+            font-size: 10px;
+            font-weight: 700;
+            background-color: #DBEAFE;
+            color: var(--primary-blue);
+            padding: 2px 8px;
+            border-radius: 10px;
         }
 
         .call-badge {
@@ -626,7 +634,7 @@
             background-color: #059669;
         }
 
-        /* Video Call Panel */
+        /* Dynamic Multi-Participant Call Room Box */
         .video-call-box {
             display: none;
             background-color: #0F172A;
@@ -640,35 +648,62 @@
             display: flex;
         }
 
-        .video-screen {
+        /* Multi-Video Stream Grid (Adapts to 1, 2, 3+ participants) */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 4px;
+            padding: 6px;
+            background-color: #020617;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+
+        .stream-tile {
             position: relative;
-            width: 100%;
-            height: 160px;
-            background-color: #000;
-        }
-
-        video#remoteVideo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .local-pip {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            width: 60px;
-            height: 45px;
-            border-radius: 6px;
+            background-color: #1E293B;
+            border-radius: 8px;
             overflow: hidden;
-            border: 1px solid var(--primary-blue);
+            aspect-ratio: 4/3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        video#localVideo {
+        .stream-tile video {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        .stream-tile.local video {
             transform: scaleX(-1);
+        }
+
+        .stream-label {
+            position: absolute;
+            bottom: 4px;
+            left: 4px;
+            background: rgba(15, 23, 42, 0.75);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            z-index: 5;
+        }
+
+        .audio-avatar-placeholder {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background-color: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
         }
 
         .video-controls {
@@ -869,8 +904,8 @@
                 </div>
 
                 <div class="header-controls">
-                    <button class="action-icon-btn" title="Recherche"><i class="fa-regular fa-comment-dots"></i></button>
-                    <button id="startCallBtn" class="action-icon-btn" title="Démarrer un Appel Vidéo"><i class="fa-solid fa-video"></i></button>
+                    <button id="startAudioCallBtn" class="action-icon-btn" title="Démarrer un Appel Audio"><i class="fa-solid fa-phone"></i></button>
+                    <button id="startVideoCallBtn" class="action-icon-btn" title="Démarrer un Appel Vidéo"><i class="fa-solid fa-video"></i></button>
                     <button id="toggleRightSidebar" class="action-icon-btn" title="Profil & Info"><i class="fa-solid fa-circle-info"></i></button>
                     <a href="/" class="action-icon-btn" title="Quitter" style="color: var(--text-light);"><i class="fa-solid fa-right-from-bracket"></i></a>
                 </div>
@@ -912,14 +947,9 @@
                 <div class="profile-location">Membre Oxalix</div>
             </div>
 
-            <!-- Active Video Call Screen (When participating) -->
+            <!-- Active Call Screen with Dynamic Multi-Participant Video Grid -->
             <div id="videoCallBox" class="video-call-box">
-                <div class="video-screen">
-                    <video id="remoteVideo" autoplay playsinline></video>
-                    <div class="local-pip">
-                        <video id="localVideo" autoplay playsinline muted></video>
-                    </div>
-                </div>
+                <div id="videoGrid" class="video-grid"></div>
                 <div class="video-controls">
                     <button id="toggleAudioBtn" class="v-btn"><i class="fa-solid fa-microphone"></i></button>
                     <button id="toggleVideoBtn" class="v-btn"><i class="fa-solid fa-video"></i></button>
@@ -956,7 +986,6 @@
         const username = "{{ username }}";
         const room = "{{ room }}";
 
-        // Display user initials
         if (username) {
             const initials = username.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
             document.getElementById('userInitial').textContent = initials;
@@ -999,18 +1028,19 @@
         const sharedFilesList = document.getElementById('sharedFilesList');
         const sharedPhotosGrid = document.getElementById('sharedPhotosGrid');
 
-        const startCallBtn = document.getElementById('startCallBtn');
+        const startVideoCallBtn = document.getElementById('startVideoCallBtn');
+        const startAudioCallBtn = document.getElementById('startAudioCallBtn');
         const endCallBtn = document.getElementById('endCallBtn');
         const videoCallBox = document.getElementById('videoCallBox');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
+        const videoGrid = document.getElementById('videoGrid');
         const toggleAudioBtn = document.getElementById('toggleAudioBtn');
         const toggleVideoBtn = document.getElementById('toggleVideoBtn');
         const activeCallsContainer = document.getElementById('activeCallsContainer');
 
         let localStream = null;
-        let peerConnection = null;
         let currentCallId = null;
+        let currentCallType = 'video';
+        let peerConnections = {}; // { peerUsername: RTCPeerConnection }
         let isAudioMuted = false;
         let isVideoOff = false;
 
@@ -1130,7 +1160,6 @@
                 if (data.file_type === 'image') {
                     fileHtml = `<br><img src="${data.file_url}" class="message-image-attachment" onclick="window.open('${data.file_url}')" title="Agrandir">`;
 
-                    // Add to right sidebar photos
                     const imgThumb = document.createElement('img');
                     imgThumb.src = data.file_url;
                     imgThumb.className = 'photo-thumb';
@@ -1140,7 +1169,6 @@
                     const filename = data.file_url.split('/').pop();
                     fileHtml = `<br><a href="${data.file_url}" target="_blank" class="message-file-attachment"><i class="fa-solid fa-file-arrow-down"></i> ${escapeHtml(filename)}</a>`;
 
-                    // Add to right sidebar files
                     const li = document.createElement('li');
                     li.innerHTML = `<a href="${data.file_url}" target="_blank">• ${escapeHtml(filename)}</a>`;
                     sharedFilesList.prepend(li);
@@ -1169,48 +1197,128 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        // --- WebRTC Media Stream ---
-        async function getMediaStream() {
+        // --- WebRTC Multi-Participant Stream & Grid Handlers ---
+        async function getMediaStream(callType = 'video') {
             if (!localStream) {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVideo.srcObject = localStream;
+                const constraints = callType === 'audio'
+                    ? { audio: true, video: false }
+                    : { audio: true, video: true };
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                addLocalStreamTile(localStream, callType);
             }
             return localStream;
         }
 
-        function createPeerConnection() {
-            if (peerConnection) return peerConnection;
-            peerConnection = new RTCPeerConnection(rtcConfiguration);
+        function addLocalStreamTile(stream, callType) {
+            let tile = document.getElementById('tile_local');
+            if (!tile) {
+                tile = document.createElement('div');
+                tile.id = 'tile_local';
+                tile.className = 'stream-tile local';
 
-            if (localStream) {
-                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+                if (callType === 'video' && stream.getVideoTracks().length > 0) {
+                    const v = document.createElement('video');
+                    v.autoplay = true;
+                    v.playsInline = true;
+                    v.muted = true;
+                    v.srcObject = stream;
+                    tile.appendChild(v);
+                } else {
+                    const initials = username.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    tile.innerHTML = `<div class="audio-avatar-placeholder">${initials}</div>`;
+                }
+
+                const label = document.createElement('span');
+                label.className = 'stream-label';
+                label.textContent = `${username} (Vous)`;
+                tile.appendChild(label);
+                videoGrid.appendChild(tile);
             }
-
-            peerConnection.ontrack = (e) => {
-                if (e.streams && e.streams[0]) {
-                    remoteVideo.srcObject = e.streams[0];
-                }
-            };
-
-            peerConnection.onicecandidate = (e) => {
-                if (e.candidate) {
-                    socket.emit('webrtc_ice_candidate', { room: room, candidate: e.candidate });
-                }
-            };
-
-            return peerConnection;
         }
 
-        // --- Right Sidebar Call Queue ---
+        function addRemoteStreamTile(peerUser, stream, callType) {
+            let tile = document.getElementById(`tile_${peerUser}`);
+            if (!tile) {
+                tile = document.createElement('div');
+                tile.id = `tile_${peerUser}`;
+                tile.className = 'stream-tile';
 
-        // Top button creates a new call listing in the queue
-        startCallBtn.addEventListener('click', () => {
-            socket.emit('create_call', { room: room, username: username });
+                if (callType === 'video' && stream.getVideoTracks().length > 0) {
+                    const v = document.createElement('video');
+                    v.id = `video_${peerUser}`;
+                    v.autoplay = true;
+                    v.playsInline = true;
+                    v.srcObject = stream;
+                    tile.appendChild(v);
+                } else {
+                    const a = document.createElement('audio');
+                    a.autoplay = true;
+                    a.srcObject = stream;
+                    tile.appendChild(a);
+
+                    const initials = peerUser.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    const avatar = document.createElement('div');
+                    avatar.className = 'audio-avatar-placeholder';
+                    avatar.textContent = initials;
+                    tile.appendChild(avatar);
+                }
+
+                const label = document.createElement('span');
+                label.className = 'stream-label';
+                label.textContent = peerUser;
+                tile.appendChild(label);
+                videoGrid.appendChild(tile);
+            }
+        }
+
+        function removePeerStreamTile(peerUser) {
+            const tile = document.getElementById(`tile_${peerUser}`);
+            if (tile) tile.remove();
+        }
+
+        function getOrCreatePeerConnection(peerUser) {
+            if (peerConnections[peerUser]) return peerConnections[peerUser];
+
+            const pc = new RTCPeerConnection(rtcConfiguration);
+            peerConnections[peerUser] = pc;
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            }
+
+            pc.ontrack = (e) => {
+                if (e.streams && e.streams[0]) {
+                    addRemoteStreamTile(peerUser, e.streams[0], currentCallType);
+                }
+            };
+
+            pc.onicecandidate = (e) => {
+                if (e.candidate) {
+                    socket.emit('webrtc_signal', {
+                        room: room,
+                        sender: username,
+                        target: peerUser,
+                        type: 'candidate',
+                        candidate: e.candidate
+                    });
+                }
+            };
+
+            return pc;
+        }
+
+        // Initiating Calls: Video or Audio
+        startVideoCallBtn.addEventListener('click', () => {
+            socket.emit('create_call', { room: room, username: username, call_type: 'video' });
+        });
+
+        startAudioCallBtn.addEventListener('click', () => {
+            socket.emit('create_call', { room: room, username: username, call_type: 'audio' });
         });
 
         socket.on('call_created', async (callData) => {
             if (callData.host === username) {
-                await joinCall(callData.call_id);
+                await joinCall(callData.call_id, callData.call_type);
             }
         });
 
@@ -1227,68 +1335,100 @@
 
             calls.forEach(call => {
                 const isParticipating = call.participants.includes(username);
+                const icon = call.call_type === 'video' ? 'fa-video' : 'fa-phone';
+                const typeLabel = call.call_type === 'video' ? 'Vidéo' : 'Audio';
+
                 const card = document.createElement('div');
                 card.className = 'call-card';
                 card.innerHTML = `
                     <div class="call-card-header">
-                        <span class="call-card-title"><i class="fa-solid fa-video"></i> ${escapeHtml(call.title)}</span>
-                        <span class="call-badge">${call.participants.length} en ligne</span>
+                        <span class="call-card-title"><i class="fa-solid ${icon}"></i> ${escapeHtml(call.title)}</span>
+                        <span class="call-type-badge">${typeLabel}</span>
                     </div>
                     <div class="call-participants">
-                        <i class="fa-solid fa-users"></i> ${call.participants.map(p => escapeHtml(p)).join(', ')}
+                        <i class="fa-solid fa-users"></i> ${call.participants.map(p => escapeHtml(p)).join(', ')} (${call.participants.length})
                     </div>
                     ${!isParticipating ? `
-                        <button class="btn-join-call" onclick="joinCall('${call.call_id}')">
+                        <button class="btn-join-call" onclick="joinCall('${call.call_id}', '${call.call_type}')">
                             <i class="fa-solid fa-phone"></i> Rejoindre
                         </button>
                     ` : `
-                        <div style="font-size:11px; color:var(--online-green); font-weight:700;"><i class="fa-solid fa-circle-check"></i> Vous êtes dans cet appel</div>
+                        <div style="font-size:11px; color:var(--online-green); font-weight:700;"><i class="fa-solid fa-circle-check"></i> En cours d'appel</div>
                     `}
                 `;
                 activeCallsContainer.appendChild(card);
             });
         }
 
-        async function joinCall(callId) {
+        async function joinCall(callId, callType = 'video') {
             currentCallId = callId;
+            currentCallType = callType;
             videoCallBox.classList.add('active');
             if (window.innerWidth <= 1024) {
                 sidebarRight.classList.add('mobile-open');
             }
-            await getMediaStream();
-            const pc = createPeerConnection();
 
+            await getMediaStream(callType);
             socket.emit('join_call', { room: room, call_id: callId, username: username });
-
-            // Create WebRTC offer to connect with peers in call
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            socket.emit('webrtc_offer', { room: room, offer: offer, call_id: callId });
         }
 
-        socket.on('webrtc_offer', async (data) => {
-            try {
-                await getMediaStream();
-                const pc = createPeerConnection();
+        // When a new peer joins an active call, existing members initiate peer connections to them
+        socket.on('user_joined_call', async (data) => {
+            if (currentCallId === data.call_id && data.joined_user !== username) {
+                const peerUser = data.joined_user;
+                const pc = getOrCreatePeerConnection(peerUser);
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+
+                socket.emit('webrtc_signal', {
+                    room: room,
+                    sender: username,
+                    target: peerUser,
+                    type: 'offer',
+                    offer: offer
+                });
+            }
+        });
+
+        // Dynamic targeted signaling
+        socket.on('webrtc_signal', async (data) => {
+            if (data.target && data.target !== username) return;
+
+            const senderUser = data.sender;
+
+            if (data.type === 'offer') {
+                await getMediaStream(currentCallType);
+                const pc = getOrCreatePeerConnection(senderUser);
                 await pc.setRemoteDescription(new RTCSessionDescription(data.offer));
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                socket.emit('webrtc_answer', { room: room, answer: answer, call_id: data.call_id });
-            } catch (err) {
-                console.error("Erreur WebRTC Offer:", err);
+
+                socket.emit('webrtc_signal', {
+                    room: room,
+                    sender: username,
+                    target: senderUser,
+                    type: 'answer',
+                    answer: answer
+                });
+            } else if (data.type === 'answer') {
+                const pc = peerConnections[senderUser];
+                if (pc) {
+                    await pc.setRemoteDescription(new RTCSessionDescription(data.answer));
+                }
+            } else if (data.type === 'candidate') {
+                const pc = peerConnections[senderUser];
+                if (pc && data.candidate) {
+                    await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
             }
         });
 
-        socket.on('webrtc_answer', async (data) => {
-            if (peerConnection) {
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        socket.on('user_left_call', (data) => {
+            if (peerConnections[data.username]) {
+                peerConnections[data.username].close();
+                delete peerConnections[data.username];
             }
-        });
-
-        socket.on('webrtc_ice_candidate', async (data) => {
-            if (peerConnection && data.candidate) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-            }
+            removePeerStreamTile(data.username);
         });
 
         toggleAudioBtn.addEventListener('click', () => {
@@ -1313,7 +1453,6 @@
             }
         });
 
-        // Leaving a call only disconnects local user and does NOT close the call for others
         endCallBtn.addEventListener('click', () => {
             if (currentCallId) {
                 socket.emit('leave_call', { room: room, call_id: currentCallId, username: username });
@@ -1322,16 +1461,18 @@
         });
 
         function cleanUpCall() {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
+            Object.keys(peerConnections).forEach(peerUser => {
+                if (peerConnections[peerUser]) {
+                    peerConnections[peerUser].close();
+                }
+            });
+            peerConnections = {};
+
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
-            localVideo.srcObject = null;
-            remoteVideo.srcObject = null;
+            videoGrid.innerHTML = '';
             videoCallBox.classList.remove('active');
             currentCallId = null;
         }
