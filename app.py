@@ -1,7 +1,9 @@
-import eventlet
-eventlet.monkey_patch()
-
 import os
+try:
+    import eventlet
+    eventlet.monkey_patch()
+except Exception:
+    pass
 import time
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify, send_from_directory
@@ -90,6 +92,14 @@ def init_db_data():
 
 with app.app_context():
     init_db_data()
+
+@app.cli.command('init-db')
+def init_db_command():
+    """Crée les tables et initialise les données utilisateurs par défaut."""
+    init_db_data()
+    print("Base de données initialisée avec succès ! Les utilisateurs suivants sont enregistrés :")
+    for u in User.query.all():
+        print(f"  - {u.id}: {u.prenom} {u.nom} ({u.fonction})")
 
 @app.route('/')
 def home():
