@@ -1,10 +1,48 @@
 # OXMEMBER — Spécification Technique Front-Office
 
-Ce document détaille les spécifications techniques et fonctionnelles du Front-Office de la plateforme **OXMEMBER**, l'application interne de messagerie instantanée et de visioconférence dédiée aux collaborateurs de l'entreprise **Oxalix**.
+Ce document détaille l'architecture logicielle, la description détaillée des **modules**, la cartographie des **bibliothèques** utilisées ainsi que les spécifications fonctionnelles du Front-Office de la plateforme **OXMEMBER**, l'application interne de messagerie instantanée et de visioconférence dédiée aux collaborateurs de l'entreprise **Oxalix**.
 
 ---
 
-## 1. Authentification & Données Back-Office
+## 1. Description Détaillée des Modules de l'Application
+
+Le projet est structuré autour de modules modulaires assurant la séparation des responsabilités entre le serveur d'application, la persistance des données et les vues utilisateur.
+
+| Fichier / Module | Type | Description & Rôle Fonctionnel |
+| :--- | :--- | :--- |
+| **`app.py`** | **Serveur Backend (Flask / Socket.IO)** | **Module Serveur Principal :**<br/>• Configuration de l'application Flask et initialisation des extensions (`SQLAlchemy`, `SocketIO`).<br/>• Définition des modèles ORM (`User`, `Message`).<br/>• Routage HTTP REST (`/`, `/chat`, `/upload`, `/api/user/<id>`, `/api/history/<room>`).<br/>• Gestionnaire d'événements Socket.IO temps réel (messages instantanés, création et suivi des appels WebRTC, signalisation P2P).<br/>• Commande CLI (`flask init-db`) pour l'initialisation et le peuplement des données Back-Office. |
+| **`templates/index.html`** | **Vue Frontend (Page d'Authentification)** | **Module d'Acheminement & Identification :**<br/>• Interface de connexion stylisée intégrant le thème pastel **OXMEMBER**.<br/>• Formulaire d'identification par **ID Utilisateur Back-Office** (ex: `OX-001`) et choix du salon.<br/>• Script JavaScript de prévisualisation dynamique interrogeant l'API `/api/user/<id>` pour afficher le nom complet et la fonction de l'employé avant connexion. |
+| **`templates/chat.html`** | **Vue Frontend (Espace de Discussion & Visioconférence)** | **Module Application Principal Front-Office :**<br/>• Disposition 3 colonnes responsive (Navigation, Discussion, Profil & Appels).<br/>• Connexion temps réel Socket.IO (`recu_msg`, `announcement_join_room`).<br/>• Module Visioconférence & Telephonie WebRTC avec file d'attente d'appels (`APPELS EN COURS`) et grille vidéo multi-participants.<br/>• Module Sélecteur d'émojis (Popover interactif).<br/>• Module Téléversement de médias avec galeries partagées (`SHARED FILES`, `SHARED PHOTOS`). |
+| **`requirement.txt`** | **Configuration Dépendances** | **Module de Gestion des Packages Python :** Spécifie l'ensemble des bibliothèques nécessaires à l'exécution du serveur backend en environnement virtuel. |
+| **`README.md`** | **Documentation Technique** | **Guide d'Installation & Déploiement :** Fournit les instructions étape par étape pour l'installation, la configuration des bases de données (MySQL / SQLite) et l'exécution des tests. |
+
+---
+
+## 2. Cartographie des Bibliothèques & Leurs Fonctions
+
+### A. Bibliothèques Backend (Python / Flask)
+
+| Bibliothèque | Catégorie | Fonction & Rôle dans l'Application |
+| :--- | :--- | :--- |
+| **`Flask`** | Framework Web | Fournit le noyau d'application Web WSGI, le moteur de rendu de templates Jinja2, la gestion des requêtes HTTP et le routage des endpoints. |
+| **`Flask-SocketIO`** | Websockets / Realtime | Permet la communication bidirectionnelle en temps réel à faible latence entre le serveur et les clients pour la messagerie instantanée et la signalisation d'appels WebRTC. |
+| **`eventlet`** | Serveur Asynchrone / WSGI | Moteur d'E/S asynchrones basé sur les greenlets permettant de gérer simultanément un grand nombre de connexions Websockets actives sous Flask-SocketIO. |
+| **`Flask-SQLAlchemy`** | ORM (Object-Relational Mapping) | Abstraction de la base de données permettant de manipuler les objets `User` et `Message` en Python sans écrire de requêtes SQL brutes. |
+| **`PyMySQL`** | Pilote BDD MySQL | Connecteur SQL purement Python permettant à SQLAlchemy d'interagir directement avec un serveur de base de données MySQL ou MariaDB. |
+| **`Werkzeug`** | Utilitaires Web | Fournit des fonctions de sécurité essentielles comme `secure_filename()` pour nettoyer les noms de fichiers téléversés et prévenir les failles de traversée de répertoire. |
+
+### B. Bibliothèques & API Frontend (Client JS / CSS)
+
+| Bibliothèque / API | Type | Fonction & Rôle dans l'Application |
+| :--- | :--- | :--- |
+| **`Socket.IO Client`** (`/socket.io.js`) | Client Websocket JS | Maintient la connexion temps réel avec le serveur Flask, écoute et émet les événements de chat (`envoie_message`, `recu_msg`) et de signalisation d'appels. |
+| **`WebRTC API`** (`RTCPeerConnection`, `getUserMedia`) | API Navigateur Native | Assure la capture audio/vidéo matérielle du microphone/caméra de l'utilisateur et établit les connexions peer-to-peer chiffrées pour les flux vidéo/audio en direct. |
+| **`Font Awesome`** (`font-awesome/6.4.0`) | CDN Icônes Vectorielles | Fournit l'ensemble des icônes graphiques de l'interface (caméra, téléphone, trombone, image, recherche, smileys, bouton de déconnexion). |
+| **`Google Fonts Inter`** | Typographie Web | Police de caractères moderne et lisible optimisée pour les interfaces utilisateur d'entreprise SaaS. |
+
+---
+
+## 3. Authentification & Données Back-Office
 
 L'accès au Front-Office s'effectue via l'identifiant unique attribué par le Back-Office (ex: `OX-001`, `OX-002`, `OX-003`).
 
@@ -27,7 +65,7 @@ L'accès au Front-Office s'effectue via l'identifiant unique attribué par le Ba
 
 ---
 
-## 2. Ergonomie & Interface Graphique (Layout 3 Colonnes)
+## 4. Ergonomie & Interface Graphique (Layout 3 Colonnes)
 
 L'interface du Front-Office (`chat.html`) utilise une structure responsive **100% Fullscreen (100vw x 100vh)** aux tons pastel clairs (dégradé violet/bleu `#E0C3FC` vers `#8EC5FC`).
 
@@ -67,7 +105,7 @@ L'interface du Front-Office (`chat.html`) utilise une structure responsive **100
 
 ---
 
-## 3. Spécifications des Appels Audio & Vidéo WebRTC
+## 5. Spécifications des Appels Audio & Vidéo WebRTC
 
 L'application intègre une visioconférence et téléphonie IP basées sur les standards **WebRTC** et **Socket.IO**.
 
@@ -94,7 +132,7 @@ L'application intègre une visioconférence et téléphonie IP basées sur les s
 
 ---
 
-## 4. Sélecteur d'Emojis & Gestion des Médias Partagés
+## 6. Sélecteur d'Emojis & Gestion des Médias Partagés
 
 ### Popover d'Emojis :
 - Un panneau rétractable s'ouvre au clic sur le bouton Smile et propose une sélection rapide des émojis les plus courants (`😃`, `😂`, `😊`, `😍`, `👍`, `👏`, `🔥`, `✨`, `🎉`, `❤️`, `🙌`, `💡`, `😎`, `🚀`, `🙏`).
@@ -107,7 +145,7 @@ L'application intègre une visioconférence et téléphonie IP basées sur les s
 
 ---
 
-## 5. Historique & Persistance des Données
+## 7. Historique & Persistance des Données
 
 - Les messages, fichiers joints et horodatages sont enregistrés de manière permanente en BDD via **Flask-SQLAlchemy**.
 - Support natif de **MySQL** avec bascule automatique sur une base **SQLite** locale (`oxmember.db`) en l'absence de variable d'environnement MySQL.
