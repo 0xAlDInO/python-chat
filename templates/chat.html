@@ -148,6 +148,8 @@
             border-radius: 12px;
             cursor: pointer;
             transition: background 0.15s;
+            text-decoration: none;
+            color: inherit;
         }
 
         .contact-item:hover, .contact-item.active {
@@ -189,7 +191,7 @@
         }
 
         .contact-name {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-main);
             margin-bottom: 2px;
@@ -197,14 +199,8 @@
             justify-content: space-between;
         }
 
-        .contact-time {
-            font-size: 11px;
-            font-weight: 400;
-            color: var(--text-light);
-        }
-
         .contact-preview {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
             white-space: nowrap;
             overflow: hidden;
@@ -547,6 +543,16 @@
             margin-bottom: 8px;
         }
 
+        .user-id-badge {
+            display: inline-block;
+            background-color: #EFF6FF;
+            color: var(--primary-blue);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
         /* Calls Queue Section in Right Sidebar */
         .calls-queue-box {
             display: flex;
@@ -861,31 +867,30 @@
             <div class="left-header">
                 <div class="brand-title-text">OXMEMBER</div>
                 <div class="nav-tabs">
-                    <div class="tab-item active">CHATS</div>
-                    <div class="tab-item">CONTACTS</div>
-                    <div class="tab-item">FAVORITES</div>
+                    <div class="tab-item active">SALONS AUTORISÉS</div>
                 </div>
             </div>
 
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" class="search-input" placeholder="Search users by name...">
+                <input type="text" class="search-input" placeholder="Search rooms...">
             </div>
 
             <div class="contacts-list">
-                <div class="contact-item active" onclick="closeMobileSidebars()">
+                {% for r in user_authorized_rooms %}
+                <a href="/chat?user_id={{ user_id }}&room={{ r.id }}" class="contact-item {% if r.id == room %}active{% endif %}">
                     <div class="avatar-container">
-                        <div class="avatar">JM</div>
-                        <div class="status-dot"></div>
+                        <div class="avatar"><i class="fa-solid fa-hashtag"></i></div>
+                        {% if r.id == room %}<div class="status-dot"></div>{% endif %}
                     </div>
                     <div class="contact-info">
                         <div class="contact-name">
-                            <span>Salon #{{ room }}</span>
-                            <span class="contact-time">Direct</span>
+                            <span>{{ r.name }}</span>
                         </div>
-                        <div class="contact-preview">Discussion de groupe Oxalix</div>
+                        <div class="contact-preview">{{ r.description }}</div>
                     </div>
-                </div>
+                </a>
+                {% endfor %}
             </div>
         </div>
 
@@ -898,8 +903,8 @@
                         <i class="fa-solid fa-bars"></i>
                     </button>
                     <div class="chat-target-info">
-                        <span class="to-label">To:</span>
-                        <span>Salon #{{ room }}</span>
+                        <span class="to-label">Salle :</span>
+                        <span>{{ room_name }} (#{{ room }})</span>
                     </div>
                 </div>
 
@@ -907,7 +912,7 @@
                     <button id="startAudioCallBtn" class="action-icon-btn" title="Démarrer un Appel Audio"><i class="fa-solid fa-phone"></i></button>
                     <button id="startVideoCallBtn" class="action-icon-btn" title="Démarrer un Appel Vidéo"><i class="fa-solid fa-video"></i></button>
                     <button id="toggleRightSidebar" class="action-icon-btn" title="Profil & Info"><i class="fa-solid fa-circle-info"></i></button>
-                    <a href="/" class="action-icon-btn" title="Quitter" style="color: var(--text-light);"><i class="fa-solid fa-right-from-bracket"></i></a>
+                    <a href="/" class="action-icon-btn" title="Déconnexion" style="color: var(--text-light);"><i class="fa-solid fa-right-from-bracket"></i></a>
                 </div>
             </div>
 
@@ -924,7 +929,7 @@
             <!-- Input Area -->
             <div class="chat-input-container">
                 <form id="message_input_form" class="input-box-wrapper">
-                    <input type="text" id="message_input" class="message-text-input" placeholder="Type your message here..." autocomplete="off">
+                    <input type="text" id="message_input" class="message-text-input" placeholder="Ecrivez votre message ici..." autocomplete="off">
 
                     <div class="input-actions-bar">
                         <div class="input-left-tools">
@@ -945,6 +950,7 @@
                 <div class="profile-avatar" id="userInitial">OX</div>
                 <div class="profile-name" id="profileUsername">{{ username }}</div>
                 <div class="profile-location" id="profileFonction">{{ fonction }}</div>
+                <div class="user-id-badge"><i class="fa-solid fa-id-badge"></i> {{ user_id }}</div>
             </div>
 
             <!-- Active Call Screen with Dynamic Multi-Participant Video Grid -->

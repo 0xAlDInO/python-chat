@@ -1,6 +1,6 @@
 # OXMEMBER — Spécification Technique Front-Office
 
-Ce document détaille l'architecture logicielle, la description détaillée des **modules**, la cartographie des **bibliothèques** utilisées ainsi que les spécifications fonctionnelles du Front-Office de la plateforme **OXMEMBER**, l'application interne de messagerie instantanée et de visioconférence dédiée aux collaborateurs de l'entreprise **Oxalix**.
+Ce document détaille l'architecture logicielle, la description détaillée des **modules**, la cartographie des **bibliothèques** utilisées, les règles d'**autorisation par salle** ainsi que le **jeu de tests** du Front-Office de la plateforme **OXMEMBER**, l'application interne de messagerie instantanée et de visioconférence dédiée aux collaborateurs de l'entreprise **Oxalix**.
 
 ---
 
@@ -10,11 +10,11 @@ Le projet est structuré autour de modules modulaires assurant la séparation de
 
 | Fichier / Module | Type | Description & Rôle Fonctionnel |
 | :--- | :--- | :--- |
-| **`app.py`** | **Serveur Backend (Flask / Socket.IO)** | **Module Serveur Principal :**<br/>• Configuration de l'application Flask et initialisation des extensions (`SQLAlchemy`, `SocketIO`).<br/>• Définition des modèles ORM (`User`, `Message`).<br/>• Routage HTTP REST (`/`, `/chat`, `/upload`, `/api/user/<id>`, `/api/history/<room>`).<br/>• Gestionnaire d'événements Socket.IO temps réel (messages instantanés, création et suivi des appels WebRTC, signalisation P2P).<br/>• Commande CLI (`flask init-db`) pour l'initialisation et le peuplement des données Back-Office. |
-| **`templates/index.html`** | **Vue Frontend (Page d'Authentification)** | **Module d'Acheminement & Identification :**<br/>• Interface de connexion stylisée intégrant le thème pastel **OXMEMBER**.<br/>• Formulaire d'identification par **ID Utilisateur Back-Office** (ex: `OX-001`) et choix du salon.<br/>• Script JavaScript de prévisualisation dynamique interrogeant l'API `/api/user/<id>` pour afficher le nom complet et la fonction de l'employé avant connexion. |
-| **`templates/chat.html`** | **Vue Frontend (Espace de Discussion & Visioconférence)** | **Module Application Principal Front-Office :**<br/>• Disposition 3 colonnes responsive (Navigation, Discussion, Profil & Appels).<br/>• Connexion temps réel Socket.IO (`recu_msg`, `announcement_join_room`).<br/>• Module Visioconférence & Telephonie WebRTC avec file d'attente d'appels (`APPELS EN COURS`) et grille vidéo multi-participants.<br/>• Module Sélecteur d'émojis (Popover interactif).<br/>• Module Téléversement de médias avec galeries partagées (`SHARED FILES`, `SHARED PHOTOS`). |
+| **`app.py`** | **Serveur Backend (Flask / Socket.IO)** | **Module Serveur Principal :**<br/>• Configuration de l'application Flask et initialisation des extensions (`SQLAlchemy`, `SocketIO`).<br/>• Définition des modèles ORM (`User`, `Room`, `Message` et table d'association `user_rooms`).<br/>• Routage HTTP REST (`/`, `/chat`, `/upload`, `/api/user/rooms/<id>`, `/api/history/<room>`).<br/>• Contrôle strict des autorisations d'accès aux salles lors de l'authentification.<br/>• Gestionnaire d'événements Socket.IO temps réel (messages instantanés, création et suivi des appels WebRTC, signalisation P2P).<br/>• Commande CLI (`flask init-db`) pour l'initialisation et le peuplement des données Back-Office. |
+| **`templates/index.html`** | **Vue Frontend (Page d'Authentification)** | **Module d'Acheminement & Contrôle d'Accès :**<br/>• Interface de connexion stylisée intégrant le thème pastel **OXMEMBER**.<br/>• Formulaire d'identification par **ID Utilisateur Back-Office** (ex: `OX-001`) et sélection de la salle.<br/>• Gestion de l'affichage des bannières d'erreur dynamiques en cas d'accès refusé ou d'identifiant inexistant. |
+| **`templates/chat.html`** | **Vue Frontend (Espace de Discussion & Visioconférence)** | **Module Application Principal Front-Office :**<br/>• Disposition 3 colonnes responsive (Navigation des salons autorisés, Discussion, Profil & Appels).<br/>• Connexion temps réel Socket.IO (`recu_msg`, `announcement_join_room`).<br/>• Module Visioconférence & Téléphonie WebRTC avec file d'attente d'appels (`APPELS EN COURS`) et grille vidéo multi-participants (3+ caméras).<br/>• Module Sélecteur d'émojis (Popover interactif).<br/>• Module Téléversement de médias avec galeries partagées (`SHARED FILES`, `SHARED PHOTOS`). |
 | **`requirement.txt`** | **Configuration Dépendances** | **Module de Gestion des Packages Python :** Spécifie l'ensemble des bibliothèques nécessaires à l'exécution du serveur backend en environnement virtuel. |
-| **`README.md`** | **Documentation Technique** | **Guide d'Installation & Déploiement :** Fournit les instructions étape par étape pour l'installation, la configuration des bases de données (MySQL / SQLite) et l'exécution des tests. |
+| **`README.md`** | **Documentation Technique** | **Guide d'Installation & Déploiement :** Fournit les instructions étape par étape pour l'installation, la configuration des bases de données (MySQL / SQLite) et l'exécution des scénarios de test. |
 
 ---
 
@@ -24,10 +24,10 @@ Le projet est structuré autour de modules modulaires assurant la séparation de
 
 | Bibliothèque | Catégorie | Fonction & Rôle dans l'Application |
 | :--- | :--- | :--- |
-| **`Flask`** | Framework Web | Fournit le noyau d'application Web WSGI, le moteur de rendu de templates Jinja2, la gestion des requêtes HTTP et le routage des endpoints. |
+| **`Flask`** | Framework Web | Fournit le noyau d'application Web WSGI, le moteur de rendu de templates Jinja2, la gestion des requêtes HTTP, la redirection avec messages d'erreur et le routage des endpoints. |
 | **`Flask-SocketIO`** | Websockets / Realtime | Permet la communication bidirectionnelle en temps réel à faible latence entre le serveur et les clients pour la messagerie instantanée et la signalisation d'appels WebRTC. |
 | **`eventlet`** | Serveur Asynchrone / WSGI | Moteur d'E/S asynchrones basé sur les greenlets permettant de gérer simultanément un grand nombre de connexions Websockets actives sous Flask-SocketIO. |
-| **`Flask-SQLAlchemy`** | ORM (Object-Relational Mapping) | Abstraction de la base de données permettant de manipuler les objets `User` et `Message` en Python sans écrire de requêtes SQL brutes. |
+| **`Flask-SQLAlchemy`** | ORM (Object-Relational Mapping) | Abstraction de la base de données permettant de manipuler les objets `User`, `Room`, `Message` et la table d'association d'autorisations `user_rooms`. |
 | **`PyMySQL`** | Pilote BDD MySQL | Connecteur SQL purement Python permettant à SQLAlchemy d'interagir directement avec un serveur de base de données MySQL ou MariaDB. |
 | **`Werkzeug`** | Utilitaires Web | Fournit des fonctions de sécurité essentielles comme `secure_filename()` pour nettoyer les noms de fichiers téléversés et prévenir les failles de traversée de répertoire. |
 
@@ -42,30 +42,45 @@ Le projet est structuré autour de modules modulaires assurant la séparation de
 
 ---
 
-## 3. Authentification & Données Back-Office
+## 3. Matrice d'Autorisations par Salle & Authentification Back-Office
 
-L'accès au Front-Office s'effectue via l'identifiant unique attribué par le Back-Office (ex: `OX-001`, `OX-002`, `OX-003`).
+Afin d'assurer la sécurité des échanges internes d'Oxalix, l'accès à chaque salle de discussion est strictement réglementé par la BDD du Back-Office via une relation **Many-To-Many** entre les utilisateurs et les salles.
 
-### Fonctionnement :
-1. **Saisie de l'ID :** Sur la page d'accueil (`index.html`), l'utilisateur renseigne son **ID Utilisateur** et le **Salon de discussion** souhaité.
-2. **Prévisualisation dynamique :** Le Front-Office interroge l'API du serveur (`/api/user/<user_id>`) pour afficher en temps réel le nom, le prénom et la fonction de l'employé avant validation.
-3. **Récupération des attributs :** À la validation, les informations officielles transmises au chat sont :
-   - **ID Utilisateur** (ex: `OX-001`)
-   - **Nom complet** (ex: `Alice Dupont`)
-   - **Fonction officielle** (ex: `Chef de Projet`)
+### Matrice d'Accès Pré-Populée :
 
-### Base d'exemples d'employés Back-Office :
-| ID Utilisateur | Nom & Prénom | Fonction Officielle |
-| :--- | :--- | :--- |
-| **OX-001** | Alice Dupont | Chef de Projet |
-| **OX-002** | Jean Martin | Développeur Senior |
-| **OX-003** | Sophie Bernard | UI/UX Designer |
-| **OX-004** | Thomas Dubois | Ingénieur DevOps |
-| **OX-005** | Claire Moreau | Responsable Produit |
+| ID Utilisateur | Nom & Prénom | Fonction Officielle | Salles Autorisées |
+| :--- | :--- | :--- | :--- |
+| **OX-001** | Alice Dupont | Chef de Projet | `101` (Général), `dev` (Développement), `reunion` (Réunion) |
+| **OX-002** | Jean Martin | Développeur Senior | `101` (Général), `dev` (Développement) |
+| **OX-003** | Sophie Bernard | UI/UX Designer | `101` (Général), `reunion` (Réunion) |
+| **OX-004** | Thomas Dubois | Ingénieur DevOps | `101` (Général), `dev` (Développement) |
+| **OX-005** | Claire Moreau | Directrice Générale | `101` (Général), `dev`, `reunion`, `directeur` (Direction) |
+
+### Règle de Gestion des Erreurs :
+1. **Confidentialité lors de la Saisie :** Le nom de l'utilisateur **n'est pas affiché publiquement** sur la page de connexion lors de la saisie de l'ID.
+2. **Si l'ID n'existe pas :** L'utilisateur est redirigé vers `/` avec le message d'erreur :
+   `"Identifiant 'OX-999' inexistant dans la base Back-Office."`
+3. **Si l'utilisateur n'a pas accès à la salle :** L'accès est refusé et le serveur redirige avec le message :
+   `"Accès refusé : L'identifiant OX-002 n'a pas l'autorisation pour la Salle Réunion (reunion)."`
 
 ---
 
-## 4. Ergonomie & Interface Graphique (Layout 3 Colonnes)
+## 4. Jeu de Tests (Test Suite & Verification)
+
+Le tableau ci-dessous constitue le jeu de tests fonctionnels pour valider l'étanchéité du système d'authentification et d'autorisation :
+
+| N° Test | ID Utilisateur | Salle Ciblée | Résultat Attendu | Statut |
+| :---: | :---: | :---: | :--- | :---: |
+| **TC-01** | `OX-001` | `dev` | **Succès :** Redirection vers `/chat`. Affichage d'Alice Dupont (Chef de Projet). | **PASSED** |
+| **TC-02** | `OX-002` | `reunion` | **Échec :** Redirection vers `/`. Alerte *"Accès refusé : OX-002 n'a pas l'autorisation pour la Salle Réunion"*. | **PASSED** |
+| **TC-03** | `OX-003` | `dev` | **Échec :** Redirection vers `/`. Alerte *"Accès refusé : OX-003 n'a pas l'autorisation pour la Salle Développement"*. | **PASSED** |
+| **TC-04** | `OX-005` | `directeur` | **Succès :** Redirection vers `/chat`. Seule Claire Moreau (Direction) accède à cette salle. | **PASSED** |
+| **TC-05** | `OX-999` | `101` | **Échec :** Redirection vers `/`. Alerte *"Identifiant 'OX-999' inexistant dans la base Back-Office"*. | **PASSED** |
+| **TC-06** | `OX-001` | `salle-inconnue` | **Échec :** Redirection vers `/`. Alerte *"La salle 'salle-inconnue' n'existe pas"*. | **PASSED** |
+
+---
+
+## 5. Ergonomie & Interface Graphique (Layout 3 Colonnes)
 
 L'interface du Front-Office (`chat.html`) utilise une structure responsive **100% Fullscreen (100vw x 100vh)** aux tons pastel clairs (dégradé violet/bleu `#E0C3FC` vers `#8EC5FC`).
 
@@ -78,75 +93,18 @@ L'interface du Front-Office (`chat.html`) utilise une structure responsive **100
 |     (280px)      |             (Flex 1)             |     (320px)      |
 |                  |                                  |                  |
 | - Titre OXMEMBER | - En-tête du salon               | - Profil membre  |
-| - Onglets Nav    | - Flux des messages (Sable/Bleu) | - Ecran vidéo    |
+| - Salons Autorisé| - Flux des messages (Sable/Bleu) | - Ecran vidéo    |
 | - Barre recherche| - Sélecteur d'émojis (Popover)   | - Appels en cours|
-| - Liste salons   | - Zone de saisie & Téléversement | - Fichiers/Photos|
+|                  | - Zone de saisie & Téléversement | - Fichiers/Photos|
 |                  |                                  |                  |
 +------------------+----------------------------------+------------------+
 ```
 
-1. **Panneau Gauche (Sidebar Contacts - 280px) :**
-   - Marque **OXMEMBER** en typographie bold.
-   - Navigation par onglets (`CHATS`, `CONTACTS`, `FAVORIS`).
-   - Champ de recherche d'utilisateurs et statut en ligne (pastille verte).
-
-2. **Panneau Central (Flux de Chat - Flex 1) :**
-   - En-tête indiquant le nom du salon et contrôles d'appel rapide.
-   - Bulles de messages personnalisées :
-     - **Sable doux (`#FFF8E7`)** pour les messages reçus.
-     - **Bleu doux (`#E3F2FD`)** pour les messages envoyés.
-   - Zone de saisie avec bouton **REPLY**, popover émojis et icônes d'import de fichiers.
-
-3. **Panneau Droit (Profil & Appels - 320px) :**
-   - Carte profil affichant le nom complet et la fonction de l'utilisateur connecté.
-   - Fenêtre d'appel vidéo/audio active avec grilles vidéo.
-   - File d'attente des appels en cours (**APPELS EN COURS**).
-   - Galeries **SHARED FILES** et **SHARED PHOTOS**.
-
 ---
 
-## 5. Spécifications des Appels Audio & Vidéo WebRTC
+## 6. Spécifications des Appels Audio & Vidéo WebRTC
 
-L'application intègre une visioconférence et téléphonie IP basées sur les standards **WebRTC** et **Socket.IO**.
-
-### Fonctionnalités :
-
-1. **Aucune Pop-up Intrusive :**
-   - Lorsqu'un utilisateur démarre un appel vidéo ou audio via les icônes d'en-tête, l'appel est directement publié dans la liste **APPELS EN COURS** du panneau droit de tous les membres du salon.
-
-2. **File d'Attente des Appels (Calls Queue) :**
-   - Chaque carte d'appel indique le créateur de l'appel (ex: *Appel Vidéo de Alice*), le type (*Vidéo* ou *Audio*), et la liste des participants connectés avec leur nombre exact.
-   - Les autres membres du salon peuvent cliquer sur **Rejoindre** à tout moment.
-
-3. **Affichage Multi-Participants (Grid System 3+ Participants) :**
-   - Pour les appels vidéo comprenant 3 participants ou plus, le composant vidéo ajuste dynamiquement sa grille (`grid-template-columns: repeat(auto-fit, minmax(110px, 1fr))`) pour afficher simultanément les caméras de tous les membres en direct.
-
-4. **Contrôles d'Appel :**
-   - Bouton Mute / Unmute du microphone.
-   - Bouton Activation / Désactivation de la caméra vidéo.
-   - Bouton de fin d'appel (Téléphone rouge).
-
-5. **Règles de Fermeture d'Appel :**
-   - Si un participant secondaire quitte l'appel, son flux est retiré de la grille sans affecter les autres participants.
-   - **Si l'organisateur/créateur de l'appel quitte, l'appel est automatiquement terminé pour l'ensemble des participants.**
-
----
-
-## 6. Sélecteur d'Emojis & Gestion des Médias Partagés
-
-### Popover d'Emojis :
-- Un panneau rétractable s'ouvre au clic sur le bouton Smile et propose une sélection rapide des émojis les plus courants (`😃`, `😂`, `😊`, `😍`, `👍`, `👏`, `🔥`, `✨`, `🎉`, `❤️`, `🙌`, `💡`, `😎`, `🚀`, `🙏`).
-- Le clic sur un émoji l'insère à la position actuelle du champ de saisie.
-
-### Téléversement de Fichiers & Images :
-- **Images (PNG, JPG, GIF, WebP) :** Affichées sous forme de miniature intégrée dans la bulle de chat (agrandissable au clic) et automatiquement ajoutées en haut de la galerie **SHARED PHOTOS**.
-- **Documents (PDF, XLSX, DOCX...) :** Affichés sous forme de lien de téléchargement direct dans la bulle et ajoutés à la liste **SHARED FILES**.
-- **Comportement au Démarrage :** Les listes **SHARED FILES** et **SHARED PHOTOS** du panneau droit sont **initialement vides** à l'entrée dans un salon et se complètent dynamiquement au cours des échanges.
-
----
-
-## 7. Historique & Persistance des Données
-
-- Les messages, fichiers joints et horodatages sont enregistrés de manière permanente en BDD via **Flask-SQLAlchemy**.
-- Support natif de **MySQL** avec bascule automatique sur une base **SQLite** locale (`oxmember.db`) en l'absence de variable d'environnement MySQL.
-- Lors de l'entrée dans un salon, l'historique complet est automatiquement rechargé via l'API REST `/api/history/<room>`.
+1. **Aucune Pop-up Intrusive :** Les appels audio et vidéo sont publiés dans la section **APPELS EN COURS** du panneau droit.
+2. **Rejoindre un Appel :** Bouton **Rejoindre** dynamique pour tous les membres autorisés.
+3. **Affichage Multi-Participants :** Grille vidéo dynamique adaptative pour 3 participants ou plus.
+4. **Fermeture d'Appel :** La fin d'appel par le créateur/hôte met fin à la session pour tous les participants.

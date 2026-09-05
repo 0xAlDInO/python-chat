@@ -13,10 +13,13 @@
             --primary-blue: #3B82F6;
             --primary-hover: #2563EB;
             --bg-gradient: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%);
-            --card-bg: #FFFFFF;
+            --card-bg: rgba(255, 255, 255, 0.92);
             --text-main: #1E293B;
             --text-muted: #64748B;
             --border-color: #E2E8F0;
+            --danger-bg: #FEF2F2;
+            --danger-border: #FCA5A5;
+            --danger-text: #991B1B;
         }
 
         * {
@@ -36,13 +39,30 @@
         }
 
         .login-card {
-            background-color: var(--card-bg);
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
             width: 100%;
-            max-width: 420px;
+            max-width: 440px;
             padding: 40px 32px;
             border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #EFF6FF;
+            color: var(--primary-blue);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
         }
 
         .brand-title {
@@ -54,9 +74,32 @@
         }
 
         .brand-subtitle {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 28px;
+            margin-bottom: 24px;
+        }
+
+        /* Error Alert Banner */
+        .error-alert {
+            background-color: var(--danger-bg);
+            border: 1px solid var(--danger-border);
+            color: var(--danger-text);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
         }
 
         .form-group {
@@ -85,7 +128,7 @@
             font-size: 15px;
         }
 
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
             padding: 12px 16px 12px 44px;
             border: 1px solid var(--border-color);
@@ -93,64 +136,40 @@
             font-size: 14px;
             color: var(--text-main);
             outline: none;
+            background-color: #FFFFFF;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
 
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             border-color: var(--primary-blue);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
-        .user-preview-box {
-            display: none;
+        .demo-ids-box {
             background-color: #F8FAFC;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 12px;
             margin-bottom: 20px;
             text-align: left;
+            font-size: 12px;
         }
 
-        .user-preview-box.active {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-preview-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background-color: #DBEAFE;
-            color: var(--primary-blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        .user-preview-info {
-            flex: 1;
-        }
-
-        .user-preview-name {
-            font-size: 13px;
+        .demo-ids-header {
             font-weight: 700;
             color: var(--text-main);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .user-preview-role {
-            font-size: 11px;
-            color: var(--primary-blue);
-            font-weight: 600;
-        }
-
-        .demo-ids-hint {
-            font-size: 11px;
+        .demo-ids-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
             color: var(--text-muted);
-            margin-top: 6px;
-            text-align: left;
         }
 
         .btn-submit {
@@ -165,79 +184,71 @@
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            transition: background 0.15s;
-            margin-top: 8px;
+            transition: background 0.15s, transform 0.1s;
         }
 
         .btn-submit:hover {
             background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
 
     <div class="login-card">
+        <div class="brand-badge"><i class="fa-solid fa-shield-halved"></i> Espace Sécurisé Oxalix</div>
         <div class="brand-title">OXMEMBER</div>
-        <div class="brand-subtitle">Plateforme interne Oxalix</div>
+        <div class="brand-subtitle">Authentification par Identifiant Back-Office</div>
+
+        {% if error %}
+        <div class="error-alert">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div>{{ error }}</div>
+        </div>
+        {% endif %}
 
         <form action="/chat" method="GET">
             <div class="form-group">
-                <label class="form-label" for="user_id">ID Utilisateur Backoffice</label>
+                <label class="form-label" for="user_id">Identifiant Utilisateur (ID)</label>
                 <div class="input-wrapper">
-                    <i class="fa-solid fa-id-card input-icon"></i>
-                    <input type="text" id="user_id" name="user_id" class="form-input" placeholder="ex: OX-001, OX-002..." required autocomplete="off">
-                </div>
-                <div class="demo-ids-hint">Exemples: <b>OX-001</b> (Alice Dupont), <b>OX-002</b> (Jean Martin), <b>OX-003</b> (Sophie Bernard)</div>
-            </div>
-
-            <!-- Auto-fetched User Preview -->
-            <div id="userPreviewBox" class="user-preview-box">
-                <div id="userPreviewAvatar" class="user-preview-avatar">OX</div>
-                <div class="user-preview-info">
-                    <div id="userPreviewName" class="user-preview-name">--</div>
-                    <div id="userPreviewRole" class="user-preview-role">--</div>
+                    <i class="fa-solid fa-id-badge input-icon"></i>
+                    <input type="text" id="user_id" name="user_id" class="form-input" placeholder="ex: OX-001, OX-002, OX-005..." required autocomplete="off">
                 </div>
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="room">Salon de discussion</label>
+                <label class="form-label" for="room">Salle de Discussion</label>
                 <div class="input-wrapper">
-                    <i class="fa-solid fa-hashtag input-icon"></i>
-                    <input type="text" id="room" name="room" class="form-input" placeholder="ex: 101, Projet-Alpha..." required autocomplete="off">
+                    <i class="fa-solid fa-door-open input-icon"></i>
+                    <select id="room" name="room" class="form-select" required>
+                        <option value="" disabled selected>Sélectionner une salle...</option>
+                        <option value="101">Salon Général (101)</option>
+                        <option value="dev">Salle Développement (dev)</option>
+                        <option value="reunion">Salle Réunion (reunion)</option>
+                        <option value="directeur">Salle Direction (directeur)</option>
+                    </select>
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">REJOINDR LA DISCUSSION</button>
+            <!-- Matrice d'autorisations explicative -->
+            <div class="demo-ids-box">
+                <div class="demo-ids-header"><i class="fa-solid fa-key"></i> Autorisations Back-Office :</div>
+                <ul class="demo-ids-list">
+                    <li>• <b>OX-001</b> : Salon 101, dev, reunion</li>
+                    <li>• <b>OX-002</b> : Salon 101, dev</li>
+                    <li>• <b>OX-003</b> : Salon 101, reunion</li>
+                    <li>• <b>OX-004</b> : Salon 101, dev</li>
+                    <li>• <b>OX-005</b> (Direction) : 101, dev, reunion, <b>directeur</b></li>
+                </ul>
+            </div>
+
+            <button type="submit" class="btn-submit">SE CONNECTER</button>
         </form>
     </div>
 
-    <script>
-        const userIdInput = document.getElementById('user_id');
-        const userPreviewBox = document.getElementById('userPreviewBox');
-        const userPreviewAvatar = document.getElementById('userPreviewAvatar');
-        const userPreviewName = document.getElementById('userPreviewName');
-        const userPreviewRole = document.getElementById('userPreviewRole');
-
-        userIdInput.addEventListener('input', () => {
-            const val = userIdInput.value.trim().toUpperCase();
-            if (val.length >= 4) {
-                fetch(`/api/user/${val}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.full_name) {
-                            userPreviewName.textContent = data.full_name;
-                            userPreviewRole.textContent = data.fonction;
-                            userPreviewAvatar.textContent = data.prenom[0] + data.nom[0];
-                            userPreviewBox.classList.add('active');
-                        } else {
-                            userPreviewBox.classList.remove('active');
-                        }
-                    })
-                    .catch(() => userPreviewBox.classList.remove('active'));
-            } else {
-                userPreviewBox.classList.remove('active');
-            }
-        });
-    </script>
 </body>
 </html>
