@@ -33,10 +33,26 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
 
-# Active calls state in memory: { call_id: { 'call_id': id, 'room': room, 'host': host, 'type': 'video'|'audio', 'participants': [user1, user2] } }
+# Active calls state in memory
 active_calls = {}
 
 # Database Models
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.String(50), primary_key=True) # e.g. "OX-001"
+    nom = db.Column(db.String(80), nullable=False)
+    prenom = db.Column(db.String(80), nullable=False)
+    fonction = db.Column(db.String(100), nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nom': self.nom,
+            'prenom': self.prenom,
+            'full_name': f"{self.prenom} {self.nom}",
+            'fonction': self.fonction
+        }
+
 class Message(db.Model):
     __tablename__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)
@@ -58,8 +74,22 @@ class Message(db.Model):
             'timestamp': self.timestamp.strftime('%H:%M')
         }
 
-with app.app_context():
+# Pre-populate back-office employee database
+def init_db_data():
     db.create_all()
+    if User.query.count() == 0:
+        default_users = [
+            User(id="OX-001", prenom="Alice", nom="Dupont", fonction="Chef de Projet"),
+            User(id="OX-002", prenom="Jean", nom="Martin", fonction="Développeur Senior"),
+            User(id="OX-003", prenom="Sophie", nom="Bernard", fonction="UI/UX Designer"),
+            User(id="OX-004", prenom="Thomas", nom="Dubois", fonction="Ingénieur DevOps"),
+            User(id="OX-005", prenom="Claire", nom="Moreau", fonction="Responsable Produit"),
+        ]
+        db.session.bulk_save_objects(default_users)
+        db.session.commit()
+
+with app.app_context():
+    init_db_data()
 
 @app.route('/')
 def home():
@@ -69,13 +99,33 @@ def home():
 def socketio_js():
     return app.send_static_file('socket.io.js')
 
+@app.route('/api/user/<user_id>')
+def get_user_info(user_id):
+    user = User.query.filter_by(id=user_id.upper()).first()
+    if user:
+        return jsonify(user.to_dict())
+    return jsonify({'error': 'Utilisateur non trouvé'}), 404
+
 @app.route('/chat')
 def chat():
-    username = request.args.get('username')
-    room = request.args.get('room')
+    user_id = request.args.get('user_id', '').strip().upper()
+    room = request.args.get('room', '').strip()
 
-    if username and room:
-        return render_template('chat.html', username=username, room=room)
+    if user_id and room:
+        user = User.query.filter_by(id=user_id).first()
+        if not user:
+            # Fallback if user ID is unknown: create dynamically
+            user = User(id=user_id, prenom=user_id, nom="Membre", fonction="Collaborateur Oxalix")
+            db.session.add(user)
+            db.session.commit()
+
+        return render_template(
+            'chat.html',
+            user_id=user.id,
+            username=f"{user.prenom} {user.nom}",
+            fonction=user.fonction,
+            room=room
+        )
     else:
         return redirect(url_for('home'))
 
@@ -173,7 +223,6 @@ def handle_join_call(data):
             active_calls[call_id]['participants'].append(username)
 
         broadcast_room_calls(room)
-        # Broadcast to everyone in call that a new user joined so existing peers can initiate WebRTC peer connections
         emit('user_joined_call', {
             'call_id': call_id,
             'joined_user': username,
@@ -206,7 +255,6 @@ def handle_leave_call(data):
 # Targeted WebRTC Peer-to-Peer Signaling
 @socketio.on('webrtc_signal')
 def handle_webrtc_signal(data):
-    # Route signal (offer, answer, candidate) to specific target peer or broadcast to room
     emit('webrtc_signal', data, room=data['room'], include_self=False)
 
 if __name__ == "__main__":

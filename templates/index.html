@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OXMEMBER</title>
+    <title>Connexion - OXMEMBER</title>
     <!-- Font Awesome icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -17,7 +17,6 @@
             --text-main: #1E293B;
             --text-muted: #64748B;
             --border-color: #E2E8F0;
-            --input-bg: #F8FAFC;
         }
 
         * {
@@ -30,34 +29,24 @@
         body {
             background: var(--bg-gradient);
             min-height: 100vh;
-            width: 100vw;
             display: flex;
-            justify-content: center;
             align-items: center;
-            color: var(--text-main);
-            padding: 16px;
-            overflow: hidden;
+            justify-content: center;
+            padding: 20px;
         }
 
         .login-card {
             background-color: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 440px;
-            padding: 44px 36px;
+            max-width: 420px;
+            padding: 40px 32px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         .brand-title {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
             color: var(--primary-blue);
             letter-spacing: -0.5px;
@@ -65,9 +54,9 @@
         }
 
         .brand-subtitle {
-            color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 32px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
         }
 
         .form-group {
@@ -75,122 +64,180 @@
             text-align: left;
         }
 
-        .form-group label {
+        .form-label {
             display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
             margin-bottom: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .input-wrapper {
             position: relative;
-            display: flex;
-            align-items: center;
         }
 
         .input-icon {
             position: absolute;
-            left: 14px;
-            color: #94A3B8;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
             font-size: 15px;
         }
 
-        .form-control {
+        .form-input {
             width: 100%;
-            padding: 12px 16px 12px 42px;
-            background-color: var(--input-bg);
+            padding: 12px 16px 12px 44px;
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            color: var(--text-main);
+            border-radius: 12px;
             font-size: 14px;
-            transition: all 0.2s ease;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
         }
 
-        .form-control:focus {
-            outline: none;
+        .form-input:focus {
             border-color: var(--primary-blue);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-            background-color: #FFFFFF;
+        }
+
+        .user-preview-box {
+            display: none;
+            background-color: #F8FAFC;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .user-preview-box.active {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-preview-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: #DBEAFE;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .user-preview-info {
+            flex: 1;
+        }
+
+        .user-preview-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .user-preview-role {
+            font-size: 11px;
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .demo-ids-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            text-align: left;
         }
 
         .btn-submit {
             width: 100%;
             padding: 14px;
             background-color: var(--primary-blue);
-            border: none;
-            border-radius: 10px;
             color: white;
-            font-size: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background 0.15s;
+            margin-top: 8px;
         }
 
         .btn-submit:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-        }
-
-        .footer-note {
-            margin-top: 28px;
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* Mobile Adjustments */
-        @media (max-width: 480px) {
-            .login-card {
-                padding: 32px 24px;
-                border-radius: 16px;
-            }
-
-            .brand-title {
-                font-size: 28px;
-            }
         }
     </style>
 </head>
 <body>
+
     <div class="login-card">
-        <h1 class="brand-title">OXMEMBER</h1>
-        <p class="brand-subtitle">Plateforme d'échange & visioconférence Oxalix</p>
+        <div class="brand-title">OXMEMBER</div>
+        <div class="brand-subtitle">Plateforme interne Oxalix</div>
 
         <form action="/chat" method="GET">
             <div class="form-group">
-                <label for="username">Nom d'utilisateur</label>
+                <label class="form-label" for="user_id">ID Utilisateur Backoffice</label>
                 <div class="input-wrapper">
-                    <i class="fa-solid fa-user input-icon"></i>
-                    <input type="text" id="username" name="username" class="form-control" placeholder="ex: John Mayers" required autocomplete="off">
+                    <i class="fa-solid fa-id-card input-icon"></i>
+                    <input type="text" id="user_id" name="user_id" class="form-input" placeholder="ex: OX-001, OX-002..." required autocomplete="off">
+                </div>
+                <div class="demo-ids-hint">Exemples: <b>OX-001</b> (Alice Dupont), <b>OX-002</b> (Jean Martin), <b>OX-003</b> (Sophie Bernard)</div>
+            </div>
+
+            <!-- Auto-fetched User Preview -->
+            <div id="userPreviewBox" class="user-preview-box">
+                <div id="userPreviewAvatar" class="user-preview-avatar">OX</div>
+                <div class="user-preview-info">
+                    <div id="userPreviewName" class="user-preview-name">--</div>
+                    <div id="userPreviewRole" class="user-preview-role">--</div>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="room">ID du Salon / Chambre</label>
+                <label class="form-label" for="room">Salon de discussion</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-hashtag input-icon"></i>
-                    <input type="number" id="room" name="room" class="form-control" placeholder="ex: 101" required autocomplete="off">
+                    <input type="text" id="room" name="room" class="form-input" placeholder="ex: 101, Projet-Alpha..." required autocomplete="off">
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">
-                <span>Rejoindre</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
+            <button type="submit" class="btn-submit">REJOINDR LA DISCUSSION</button>
         </form>
-
-        <div class="footer-note">
-            &copy; Oxalix — Espace d'échange sécurisé
-        </div>
     </div>
+
+    <script>
+        const userIdInput = document.getElementById('user_id');
+        const userPreviewBox = document.getElementById('userPreviewBox');
+        const userPreviewAvatar = document.getElementById('userPreviewAvatar');
+        const userPreviewName = document.getElementById('userPreviewName');
+        const userPreviewRole = document.getElementById('userPreviewRole');
+
+        userIdInput.addEventListener('input', () => {
+            const val = userIdInput.value.trim().toUpperCase();
+            if (val.length >= 4) {
+                fetch(`/api/user/${val}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.full_name) {
+                            userPreviewName.textContent = data.full_name;
+                            userPreviewRole.textContent = data.fonction;
+                            userPreviewAvatar.textContent = data.prenom[0] + data.nom[0];
+                            userPreviewBox.classList.add('active');
+                        } else {
+                            userPreviewBox.classList.remove('active');
+                        }
+                    })
+                    .catch(() => userPreviewBox.classList.remove('active'));
+            } else {
+                userPreviewBox.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
