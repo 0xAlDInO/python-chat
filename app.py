@@ -38,7 +38,26 @@ socketio = SocketIO(app)
 # Active calls state in memory
 active_calls = {}
 
+# Many-to-Many Association Table for User <-> Room Authorizations
+user_rooms = db.Table('user_rooms',
+    db.Column('user_id', db.String(50), db.ForeignKey('users.id'), primary_key=True),
+    db.Column('room_id', db.String(50), db.ForeignKey('rooms.id'), primary_key=True)
+)
+
 # Database Models
+class Room(db.Model):
+    __tablename__ = 'rooms'
+    id = db.Column(db.String(50), primary_key=True) # e.g. "dev", "reunion", "directeur", "101"
+    name = db.Column(db.String(100), nullable=False) # e.g. "Salle Développement"
+    description = db.Column(db.String(255), nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description
+        }
+
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.String(50), primary_key=True) # e.g. "OX-001"
@@ -46,13 +65,18 @@ class User(db.Model):
     prenom = db.Column(db.String(80), nullable=False)
     fonction = db.Column(db.String(100), nullable=False)
 
+    # Relationship to authorized rooms
+    authorized_rooms = db.relationship('Room', secondary=user_rooms, lazy='subquery',
+        backref=db.backref('users', lazy=True))
+
     def to_dict(self):
         return {
             'id': self.id,
             'nom': self.nom,
             'prenom': self.prenom,
             'full_name': f"{self.prenom} {self.nom}",
-            'fonction': self.fonction
+            'fonction': self.fonction,
+            'authorized_rooms': [r.to_dict() for r in self.authorized_rooms]
         }
 
 class Message(db.Model):
@@ -76,18 +100,43 @@ class Message(db.Model):
             'timestamp': self.timestamp.strftime('%H:%M')
         }
 
-# Pre-populate back-office employee database
+# Pre-populate Back-Office database with users, rooms, and authorization relationships
 def init_db_data():
     db.create_all()
+
+    # Create Rooms if empty
+    if Room.query.count() == 0:
+        r_gen = Room(id="101", name="Salon Général", description="Espace général des collaborateurs")
+        r_dev = Room(id="dev", name="Salle Développement", description="Équipe technique et ingénierie")
+        r_reu = Room(id="reunion", name="Salle Réunion", description="Espace de briefing et réunions")
+        r_dir = Room(id="directeur", name="Salle Direction", description="Comité de direction Oxalix")
+
+        db.session.add_all([r_gen, r_dev, r_reu, r_dir])
+        db.session.commit()
+
+    # Create Users and Assign Authorized Rooms if empty
     if User.query.count() == 0:
-        default_users = [
-            User(id="OX-001", prenom="Alice", nom="Dupont", fonction="Chef de Projet"),
-            User(id="OX-002", prenom="Jean", nom="Martin", fonction="Développeur Senior"),
-            User(id="OX-003", prenom="Sophie", nom="Bernard", fonction="UI/UX Designer"),
-            User(id="OX-004", prenom="Thomas", nom="Dubois", fonction="Ingénieur DevOps"),
-            User(id="OX-005", prenom="Claire", nom="Moreau", fonction="Responsable Produit"),
-        ]
-        db.session.bulk_save_objects(default_users)
+        r_gen = Room.query.get("101")
+        r_dev = Room.query.get("dev")
+        r_reu = Room.query.get("reunion")
+        r_dir = Room.query.get("directeur")
+
+        u1 = User(id="OX-001", prenom="Alice", nom="Dupont", fonction="Chef de Projet")
+        u1.authorized_rooms = [r_gen, r_dev, r_reu]
+
+        u2 = User(id="OX-002", prenom="Jean", nom="Martin", fonction="Développeur Senior")
+        u2.authorized_rooms = [r_gen, r_dev]
+
+        u3 = User(id="OX-003", prenom="Sophie", nom="Bernard", fonction="UI/UX Designer")
+        u3.authorized_rooms = [r_gen, r_reu]
+
+        u4 = User(id="OX-004", prenom="Thomas", nom="Dubois", fonction="Ingénieur DevOps")
+        u4.authorized_rooms = [r_gen, r_dev]
+
+        u5 = User(id="OX-005", prenom="Claire", nom="Moreau", fonction="Directrice Générale")
+        u5.authorized_rooms = [r_gen, r_dev, r_reu, r_dir]
+
+        db.session.add_all([u1, u2, u3, u4, u5])
         db.session.commit()
 
 with app.app_context():
@@ -95,57 +144,75 @@ with app.app_context():
 
 @app.cli.command('init-db')
 def init_db_command():
-    """Crée les tables et initialise les données utilisateurs par défaut."""
+    """Crée les tables et initialise les données utilisateurs/salles par défaut."""
     init_db_data()
-    print("Base de données initialisée avec succès ! Les utilisateurs suivants sont enregistrés :")
+    print("Base de données initialisée avec succès ! Les utilisateurs et leurs autorisations :")
     for u in User.query.all():
-        print(f"  - {u.id}: {u.prenom} {u.nom} ({u.fonction})")
+        rooms_list = ", ".join([f"{r.name} ({r.id})" for r in u.authorized_rooms])
+        print(f"  - {u.id}: {u.prenom} {u.nom} ({u.fonction}) -> Salles: [{rooms_list}]")
 
 @app.route('/')
 def home():
-    return render_template("index.html")
+    error = request.args.get('error')
+    return render_template("index.html", error=error)
 
 @app.route('/socket.io.js')
 def socketio_js():
     return app.send_static_file('socket.io.js')
 
-@app.route('/api/user/<user_id>')
-def get_user_info(user_id):
-    user = User.query.filter_by(id=user_id.upper()).first()
+@app.route('/api/user/rooms/<user_id>')
+def get_user_rooms(user_id):
+    user = User.query.filter_by(id=user_id.strip().upper()).first()
     if user:
-        return jsonify(user.to_dict())
-    return jsonify({'error': 'Utilisateur non trouvé'}), 404
+        return jsonify({
+            'valid': True,
+            'authorized_rooms': [r.to_dict() for r in user.authorized_rooms]
+        })
+    return jsonify({'valid': False, 'error': 'ID Utilisateur inexistant'}), 404
 
 @app.route('/chat')
 def chat():
     user_id = request.args.get('user_id', '').strip().upper()
-    room = request.args.get('room', '').strip()
+    room_id = request.args.get('room', '').strip().lower()
 
-    if user_id and room:
-        user = User.query.filter_by(id=user_id).first()
-        if not user:
-            # Fallback if user ID is unknown: create dynamically
-            user = User(id=user_id, prenom=user_id, nom="Membre", fonction="Collaborateur Oxalix")
-            db.session.add(user)
-            db.session.commit()
+    if not user_id or not room_id:
+        return redirect(url_for('home', error="Veuillez renseigner votre ID et la salle de discussion."))
 
-        return render_template(
-            'chat.html',
-            user_id=user.id,
-            username=f"{user.prenom} {user.nom}",
-            fonction=user.fonction,
-            room=room
-        )
-    else:
-        return redirect(url_for('home'))
+    # 1. Check if user exists
+    user = User.query.filter_by(id=user_id).first()
+    if not user:
+        return redirect(url_for('home', error=f"Identifiant '{user_id}' inexistant dans la base Back-Office."))
+
+    # 2. Check if room exists
+    room = Room.query.filter_by(id=room_id).first()
+    if not room:
+        # Check by name if ID was passed as full name
+        room = Room.query.filter(Room.name.ilike(room_id)).first()
+
+    if not room:
+        return redirect(url_for('home', error=f"La salle '{room_id}' n'existe pas."))
+
+    # 3. Check authorization: does the user have access to this room?
+    if room not in user.authorized_rooms:
+        return redirect(url_for('home', error=f"Accès refusé : L'identifiant {user.id} n'a pas l'autorisation pour la {room.name} ({room.id})."))
+
+    return render_template(
+        'chat.html',
+        user_id=user.id,
+        username=f"{user.prenom} {user.nom}",
+        fonction=user.fonction,
+        room=room.id,
+        room_name=room.name,
+        user_authorized_rooms=[r.to_dict() for r in user.authorized_rooms]
+    )
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({'error': 'No file part'}), 400
+        return jsonify({'error': 'Aucun fichier sélectionné'}), 400
     file = request.files['file']
     if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
+        return jsonify({'error': 'Aucun fichier sélectionné'}), 400
 
     if file:
         filename = secure_filename(f"{int(datetime.utcnow().timestamp())}_{file.filename}")
@@ -153,7 +220,6 @@ def upload_file():
         file.save(filepath)
         file_url = f"/static/uploads/{filename}"
 
-        # Determine file type
         ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
         file_type = 'image' if ext in ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'] else 'file'
 
@@ -179,7 +245,6 @@ def broadcast_room_calls(room):
 def handle_send_message_event(data):
     app.logger.info(f"{data['username']} a envoyé un message au room {data['room']}: {data['message']}")
 
-    # Persist message in DB
     new_msg = Message(
         username=data['username'],
         room=str(data['room']),
@@ -198,7 +263,6 @@ def handle_join_room_event(data):
     app.logger.info(f"{data['username']} a rejoint le room {data['room']}")
     join_room(data['room'])
     socketio.emit('announcement_join_room', data, room=data['room'])
-    # Send current active calls in room to joining user
     emit('active_calls_update', get_room_calls(data['room']))
 
 # Call Queue & Multi-Party WebRTC Signaling Handlers
@@ -206,7 +270,7 @@ def handle_join_room_event(data):
 def handle_create_call(data):
     room = str(data['room'])
     caller = data['username']
-    call_type = data.get('call_type', 'video') # 'video' or 'audio'
+    call_type = data.get('call_type', 'video')
     call_id = f"call_{int(time.time()*1000)}"
 
     type_label = "Vidéo" if call_type == 'video' else "Audio"
@@ -249,7 +313,6 @@ def handle_leave_call(data):
     if call_id in active_calls:
         call = active_calls[call_id]
 
-        # If the creator/host leaves, terminate the call for everyone
         if username == call['host']:
             emit('call_ended', {'call_id': call_id, 'host': username}, room=room)
             del active_calls[call_id]
