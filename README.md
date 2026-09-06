@@ -41,7 +41,9 @@ L'application sera accessible sur `http://127.0.0.1:5000`.
 
 ---
 
-## 🔑 Identifiants de Test & Matrice d'Accès
+## 🔑 Jeu de Test & Matrice d'Accès Back-Office
+
+Afin de préserver la confidentialité sur la page d'accueil (login), les identifiants membres ne sont pas affichés à l'écran. Utilisez la matrice de test suivante :
 
 | ID Utilisateur | Nom & Prénom | Fonction | Salles Autorisées |
 | :--- | :--- | :--- | :--- |
@@ -50,6 +52,14 @@ L'application sera accessible sur `http://127.0.0.1:5000`.
 | **OX-003** | Sophie Bernard | UI/UX Designer | `101`, `reunion` |
 | **OX-004** | Thomas Dubois | Ingénieur DevOps | `101`, `dev` |
 | **OX-005** | Claire Moreau | Directrice Générale | `101`, `dev`, `reunion`, `directeur` |
+
+### Scénarios de Test Vérifiés :
+1. **Accès Autorisé :**
+   - Saisir `OX-002` et choisir `Salon Général (101)` ou `Salle Développement (dev)` -> Connexion réussie à l'espace de chat.
+2. **Accès Refusé (Chambre Non Autorisée) :**
+   - Saisir `OX-002` et choisir `Salle Réunion (reunion)` -> Redirection vers la page d'accueil avec message d'alerte rouge : *"Accès refusé : L'identifiant OX-002 n'a pas l'autorisation pour la Salle Réunion (reunion)"*.
+3. **Identifiant Invalide :**
+   - Saisir `OX-999` -> Redirection avec message d'erreur : *"Identifiant Back-Office invalide"*.
 
 ---
 
