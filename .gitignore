@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 instance/
+/static/uploads/
+.gitignore
