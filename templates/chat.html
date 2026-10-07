@@ -915,22 +915,31 @@
             document.getElementById('userInitial').textContent = initials;
         }
 
-        // Theme Switcher & Dynamic Logo
+        // Theme Switcher & Dynamic Logo with LocalStorage Persistence
         const themeBtn = document.getElementById('themeToggleBtn');
         const chatBrandLogo = document.getElementById('chatBrandLogo');
         const htmlElem = document.documentElement;
 
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                htmlElem.setAttribute('data-theme', 'dark');
+                if (chatBrandLogo) chatBrandLogo.src = '/static/logo_dark.png';
+                themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+                localStorage.setItem('oxmember_theme', 'dark');
+            } else {
+                htmlElem.setAttribute('data-theme', 'light');
+                if (chatBrandLogo) chatBrandLogo.src = '/static/logo_light.png';
+                themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+                localStorage.setItem('oxmember_theme', 'light');
+            }
+        }
+
+        const savedTheme = localStorage.getItem('oxmember_theme') || 'light';
+        applyTheme(savedTheme);
+
         themeBtn.addEventListener('click', () => {
             const currentTheme = htmlElem.getAttribute('data-theme');
-            if (currentTheme === 'dark') {
-                htmlElem.setAttribute('data-theme', 'light');
-                chatBrandLogo.src = '/static/logo_light.png';
-                themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-            } else {
-                htmlElem.setAttribute('data-theme', 'dark');
-                chatBrandLogo.src = '/static/logo_dark.png';
-                themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-            }
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
         });
 
         // WebSocket connection using native Django Channels WebSocket

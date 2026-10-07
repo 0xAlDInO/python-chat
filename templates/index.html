@@ -239,17 +239,26 @@
         const brandLogo = document.getElementById('brandLogo');
         const htmlElem = document.documentElement;
 
-        themeBtn.addEventListener('click', () => {
-            const currentTheme = htmlElem.getAttribute('data-theme');
-            if (currentTheme === 'dark') {
-                htmlElem.setAttribute('data-theme', 'light');
-                brandLogo.src = '/static/logo_light.png';
-                themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> Mode Sombre';
-            } else {
+        function applyTheme(theme) {
+            if (theme === 'dark') {
                 htmlElem.setAttribute('data-theme', 'dark');
                 brandLogo.src = '/static/logo_dark.png';
                 themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> Mode Clair';
+                localStorage.setItem('oxmember_theme', 'dark');
+            } else {
+                htmlElem.setAttribute('data-theme', 'light');
+                brandLogo.src = '/static/logo_light.png';
+                themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> Mode Sombre';
+                localStorage.setItem('oxmember_theme', 'light');
             }
+        }
+
+        const savedTheme = localStorage.getItem('oxmember_theme') || 'light';
+        applyTheme(savedTheme);
+
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = htmlElem.getAttribute('data-theme');
+            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
         });
     </script>
 </body>
