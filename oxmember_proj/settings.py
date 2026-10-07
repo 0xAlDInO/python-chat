@@ -1,5 +1,11 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Charger les variables d'environnement depuis le fichier .env s'il existe
+load_dotenv(BASE_DIR / '.env')
 
 # PyMySQL installation for MySQL DB support in Django
 try:
@@ -8,13 +14,12 @@ try:
 except ImportError:
     pass
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-oxmember-secret-key-oxalix-2026')
 
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ['true', '1', 't', 'yes']
 
-ALLOWED_HOSTS = ['*']
+allowed_hosts_raw = os.getenv('ALLOWED_HOSTS', '*')
+ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_raw.split(',') if h.strip()]
 
 INSTALLED_APPS = [
     'daphne', # Must be before django.contrib.staticfiles for ASGI
@@ -59,15 +64,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'oxmember_proj.wsgi.application'
 ASGI_APPLICATION = 'oxmember_proj.asgi.application'
 
-# Channel Layer Configuration (In-Memory channel layer for WebSocket chat and signaling)
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels.layers.InMemoryChannelLayer'
     }
 }
 
-# Database Configuration (MySQL using PyMySQL with SQLite fallback if MYSQL_HOST is not set)
-DB_HOST = os.getenv('MYSQL_HOST', '')
+# Configuration BDD : MySQL si MYSQL_HOST est renseigné dans .env, sinon fallback sur SQLite
+DB_HOST = os.getenv('MYSQL_HOST', '').strip()
 
 if DB_HOST:
     DATABASES = {
