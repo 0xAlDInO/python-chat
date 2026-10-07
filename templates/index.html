@@ -196,8 +196,8 @@
     <div class="login-card">
         <div class="brand-badge"><i class="fa-solid fa-shield-halved"></i> Espace Sécurisé Oxalix</div>
 
-        <!-- Official Green Clover Oxalix Logo -->
-        <img src="/static/logo.png" alt="Oxalix Logo" class="brand-logo-img">
+        <!-- Official Green Clover Oxalix Logo (Light/Dark dynamic) -->
+        <img id="brandLogo" src="/static/logo_light.png" alt="Oxalix Logo" class="brand-logo-img">
         <div class="brand-subtitle">Authentification par Identifiant Back-Office</div>
 
         {% if error %}
@@ -236,15 +236,18 @@
 
     <script>
         const themeBtn = document.getElementById('themeToggleBtn');
+        const brandLogo = document.getElementById('brandLogo');
         const htmlElem = document.documentElement;
 
         themeBtn.addEventListener('click', () => {
             const currentTheme = htmlElem.getAttribute('data-theme');
             if (currentTheme === 'dark') {
                 htmlElem.setAttribute('data-theme', 'light');
+                brandLogo.src = '/static/logo_light.png';
                 themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> Mode Sombre';
             } else {
                 htmlElem.setAttribute('data-theme', 'dark');
+                brandLogo.src = '/static/logo_dark.png';
                 themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> Mode Clair';
             }
         });

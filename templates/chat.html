@@ -785,7 +785,7 @@
         <!-- 1. LEFT SIDEBAR -->
         <div id="sidebarLeft" class="sidebar-left">
             <div class="left-header">
-                <img src="/static/logo.png" alt="Oxalix Logo" class="brand-logo-chat">
+                <img id="chatBrandLogo" src="/static/logo_light.png" alt="Oxalix Logo" class="brand-logo-chat">
                 <div class="nav-tabs">
                     <div class="tab-item active">SALONS AUTORISÉS</div>
                 </div>
@@ -915,17 +915,20 @@
             document.getElementById('userInitial').textContent = initials;
         }
 
-        // Theme Switcher
+        // Theme Switcher & Dynamic Logo
         const themeBtn = document.getElementById('themeToggleBtn');
+        const chatBrandLogo = document.getElementById('chatBrandLogo');
         const htmlElem = document.documentElement;
 
         themeBtn.addEventListener('click', () => {
             const currentTheme = htmlElem.getAttribute('data-theme');
             if (currentTheme === 'dark') {
                 htmlElem.setAttribute('data-theme', 'light');
+                chatBrandLogo.src = '/static/logo_light.png';
                 themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
             } else {
                 htmlElem.setAttribute('data-theme', 'dark');
+                chatBrandLogo.src = '/static/logo_dark.png';
                 themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
             }
         });
