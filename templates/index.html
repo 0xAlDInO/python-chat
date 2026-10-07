@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,6 +20,19 @@
             --danger-bg: #FEF2F2;
             --danger-border: #FCA5A5;
             --danger-text: #991B1B;
+            --input-bg: #FFFFFF;
+        }
+
+        [data-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            --card-bg: rgba(30, 41, 59, 0.95);
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+            --input-bg: #1E293B;
+            --danger-bg: #450A0A;
+            --danger-border: #991B1B;
+            --danger-text: #FCA5A5;
         }
 
         * {
@@ -36,6 +49,26 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 10px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
         .login-card {
@@ -45,9 +78,10 @@
             max-width: 440px;
             padding: 40px 32px;
             border-radius: 24px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 1px solid var(--border-color);
+            transition: background 0.3s, border-color 0.3s;
         }
 
         .brand-badge {
@@ -62,15 +96,16 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
-        .brand-title {
-            font-size: 28px;
-            font-weight: 800;
-            color: var(--primary-blue);
-            letter-spacing: -0.5px;
-            margin-bottom: 6px;
+        .brand-logo-img {
+            max-width: 220px;
+            height: auto;
+            margin-bottom: 8px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .brand-subtitle {
@@ -79,7 +114,6 @@
             margin-bottom: 24px;
         }
 
-        /* Error Alert Banner */
         .error-alert {
             background-color: var(--danger-bg);
             border: 1px solid var(--danger-border);
@@ -93,13 +127,6 @@
             align-items: center;
             gap: 10px;
             text-align: left;
-            animation: shake 0.3s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
         }
 
         .form-group {
@@ -136,13 +163,8 @@
             font-size: 14px;
             color: var(--text-main);
             outline: none;
-            background-color: #FFFFFF;
+            background-color: var(--input-bg);
             transition: border-color 0.15s, box-shadow 0.15s;
-        }
-
-        .form-input:focus, .form-select:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
         }
 
         .btn-submit {
@@ -162,19 +184,20 @@
 
         .btn-submit:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-1px);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
         }
     </style>
 </head>
 <body>
 
+    <button id="themeToggleBtn" class="theme-toggle-btn">
+        <i class="fa-solid fa-moon"></i> Mode Sombre
+    </button>
+
     <div class="login-card">
         <div class="brand-badge"><i class="fa-solid fa-shield-halved"></i> Espace Sécurisé Oxalix</div>
-        <div class="brand-title">OXMEMBER</div>
+
+        <!-- Official Green Clover Oxalix Logo -->
+        <img src="/static/logo.png" alt="Oxalix Logo" class="brand-logo-img">
         <div class="brand-subtitle">Authentification par Identifiant Back-Office</div>
 
         {% if error %}
@@ -211,5 +234,20 @@
         </form>
     </div>
 
+    <script>
+        const themeBtn = document.getElementById('themeToggleBtn');
+        const htmlElem = document.documentElement;
+
+        themeBtn.addEventListener('click', () => {
+            const currentTheme = htmlElem.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                htmlElem.setAttribute('data-theme', 'light');
+                themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> Mode Sombre';
+            } else {
+                htmlElem.setAttribute('data-theme', 'dark');
+                themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> Mode Clair';
+            }
+        });
+    </script>
 </body>
 </html>
